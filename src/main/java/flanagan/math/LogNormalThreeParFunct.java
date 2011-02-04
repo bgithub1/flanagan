@@ -35,13 +35,15 @@ import flanagan.roots.RealRootFunction;
 
 // Class to evaluate the three parameter log-normal distribution function
 public class LogNormalThreeParFunct implements RealRootFunction{
+  public double cfd = 0.0D;
+  public double alpha = 0.0D;
+  public double beta = 0.0D;
+  public double gamma = 0.0D;
 
-        public LogNormalThreeParFunctData data = new LogNormalThreeParFunctData(0.0D, 0.0D, 0.0D, 0.0D);
+  public double function(double x) {
 
-        public double function(double x){
+      double y = cfd - Stat.logNormalThreeParCDF(alpha, beta, gamma, x);
 
-            double y = data.cfd - Stat.logNormalThreeParCDF(data.alpha, data.beta, data.gamma, x);
-
-            return y;
-        }
+      return y;
+  }
 }
