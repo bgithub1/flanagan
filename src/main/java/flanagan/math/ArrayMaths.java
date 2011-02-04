@@ -8,13 +8,14 @@
 *   DATE:       April 2008
 *   AMENDED:    22-30 May 2008, 4 June 2008, 27-28 June 2007, 2-4 July 2008,
 *               8 July 2008, 25 July 2008, 4 September 2008, 13 December 2008
+*               29 September 2010, 29 November 2010, 18 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/ArrayMaths.html
 *
-*   Copyright (c) 2008
+*   Copyright (c) 2008 - 2011
 *
 *   PERMISSION TO COPY:
 *
@@ -84,6 +85,14 @@ public class ArrayMaths{
 
     protected boolean suppressMessages = false;         // = true when suppress 'possible loss of precision' messages has been set
 
+    public String[] words = null;                       // words in alphabetic search method
+    public String[] sortedWords = null;                 // sorted words in alphabetic search method
+    protected char[][] wordChar = null;                 // word characters in alphabetic search method
+    protected char[][] holdWordChar = null;             // holding array of word characters in alphabetic search method
+    protected int[] wordOrder = null;                   // word order indices in alphabetic search method
+    protected int[] holdWordOrder = null;               // holding array of word order indices in alphabetic search method
+    protected int nWords = 0;                           // number of words in alphabetic search method
+    protected int nLength = 0;                          // length of longest word in alphabetic search method
 
     // HashMap for 'arithmetic integer' recognition nmethod
     protected static final Map<Object,Object> integers = new HashMap<Object,Object>();
@@ -980,13 +989,13 @@ public class ArrayMaths{
             am.originalTypes = null;
         }
         else{
-            am.originalTypes = this.originalTypes.clone();
+            am.originalTypes = Conv.copy(this.originalTypes);
         }
         if(this.sortedIndices==null){
             am.sortedIndices = null;
         }
         else{
-            am.sortedIndices = this.sortedIndices.clone();
+            am.sortedIndices = Conv.copy(this.sortedIndices);
         }
         am.suppressMessages = this.suppressMessages;
         am.minmax = new ArrayList<Object>();
@@ -1140,33 +1149,33 @@ public class ArrayMaths{
 
         switch(this.type){
             case 0:
-            case 1: double[] dd = this.getArray_as_double().clone();
+            case 1: double[] dd = Conv.copy(this.getArray_as_double());
                     for(int i=0; i<this.length; i++)am.array.add(new Double(dd[i]));
                     break;
             case 2:
-            case 3: float[] ff = this.getArray_as_float().clone();
+            case 3: float[] ff = Conv.copy(this.getArray_as_float());
                     for(int i=0; i<this.length; i++)am.array.add(new Float(ff[i]));
                     break;
             case 4:
-            case 5: long[] ll = this.getArray_as_long().clone();
+            case 5: long[] ll = Conv.copy(this.getArray_as_long());
                     for(int i=0; i<this.length; i++)am.array.add(new Long(ll[i]));
                     break;
             case 6:
-            case 7: int[] ii = this.getArray_as_int().clone();
+            case 7: int[] ii = Conv.copy(this.getArray_as_int());
                     for(int i=0; i<this.length; i++)am.array.add(new Integer(ii[i]));
                     break;
             case 8:
-            case 9: short[] ss = this.getArray_as_short().clone();
+            case 9: short[] ss = Conv.copy(this.getArray_as_short());
                     for(int i=0; i<this.length; i++)am.array.add(new Short(ss[i]));
                     break;
             case 10:
-            case 11: byte[] bb = this.getArray_as_byte().clone();
+            case 11: byte[] bb = Conv.copy(this.getArray_as_byte());
                     for(int i=0; i<this.length; i++)am.array.add(new Byte(bb[i]));
                     break;
-            case 12: BigDecimal[] bd = this.getArray_as_BigDecimal().clone();
+            case 12: BigDecimal[] bd = Conv.copy(this.getArray_as_BigDecimal());
                     for(int i=0; i<this.length; i++)am.array.add(bd[i]);
                     break;
-            case 13: BigInteger[] bi = this.getArray_as_BigInteger().clone();
+            case 13: BigInteger[] bi = Conv.copy(this.getArray_as_BigInteger());
                     for(int i=0; i<this.length; i++)am.array.add(bi[i]);
                     break;
             case 14: Complex[] ccc = this.getArray_as_Complex();
@@ -1176,10 +1185,10 @@ public class ArrayMaths{
                     for(int i=0; i<this.length; i++)am.array.add(ppp[i].copy());
                     break;
             case 16:
-            case 17: char[] cc = this.getArray_as_char().clone();
+            case 17: char[] cc = Conv.copy(this.getArray_as_char());
                     for(int i=0; i<this.length; i++)am.array.add(new Character(cc[i]));
                     break;
-            case 18: String[] sss = this.getArray_as_String().clone();
+            case 18: String[] sss = Conv.copy(this.getArray_as_String());
                     for(int i=0; i<this.length; i++)am.array.add(sss[i]);
                     break;
         }
@@ -1203,13 +1212,13 @@ public class ArrayMaths{
             am.originalTypes = null;
         }
         else{
-            am.originalTypes = this.originalTypes.clone();
+            am.originalTypes = Conv.copy(this.originalTypes);
         }
         if(this.sortedIndices==null){
             am.sortedIndices = null;
         }
         else{
-            am.sortedIndices = this.sortedIndices.clone();
+            am.sortedIndices = Conv.copy(this.sortedIndices);
         }
         am.suppressMessages = this.suppressMessages;
         am.minmax = new ArrayList<Object>();
@@ -1363,33 +1372,33 @@ public class ArrayMaths{
 
         switch(this.type){
             case 0:
-            case 1: double[] dd = this.getArray_as_double().clone();
+            case 1: double[] dd = Conv.copy(this.getArray_as_double());
                     for(int i=0; i<this.length; i++)am.array.add(new Double(dd[i]));
                     break;
             case 2:
-            case 3: float[] ff = this.getArray_as_float().clone();
+            case 3: float[] ff = Conv.copy(this.getArray_as_float());
                     for(int i=0; i<this.length; i++)am.array.add(new Float(ff[i]));
                     break;
             case 4:
-            case 5: long[] ll = this.getArray_as_long().clone();
+            case 5: long[] ll = Conv.copy(this.getArray_as_long());
                     for(int i=0; i<this.length; i++)am.array.add(new Long(ll[i]));
                     break;
             case 6:
-            case 7: int[] ii = this.getArray_as_int().clone();
+            case 7: int[] ii = Conv.copy(this.getArray_as_int());
                     for(int i=0; i<this.length; i++)am.array.add(new Integer(ii[i]));
                     break;
             case 8:
-            case 9: short[] ss = this.getArray_as_short().clone();
+            case 9: short[] ss = Conv.copy(this.getArray_as_short());
                     for(int i=0; i<this.length; i++)am.array.add(new Short(ss[i]));
                     break;
             case 10:
-            case 11: byte[] bb = this.getArray_as_byte().clone();
+            case 11: byte[] bb = Conv.copy(this.getArray_as_byte());
                     for(int i=0; i<this.length; i++)am.array.add(new Byte(bb[i]));
                     break;
-            case 12: BigDecimal[] bd = this.getArray_as_BigDecimal().clone();
+            case 12: BigDecimal[] bd = Conv.copy(this.getArray_as_BigDecimal());
                     for(int i=0; i<this.length; i++)am.array.add(bd[i]);
                     break;
-            case 13: BigInteger[] bi = this.getArray_as_BigInteger().clone();
+            case 13: BigInteger[] bi = Conv.copy(this.getArray_as_BigInteger());
                     for(int i=0; i<this.length; i++)am.array.add(bi[i]);
                     break;
             case 14: Complex[] ccc = this.getArray_as_Complex();
@@ -1399,10 +1408,10 @@ public class ArrayMaths{
                     for(int i=0; i<this.length; i++)am.array.add(ppp[i].copy());
                     break;
             case 16:
-            case 17: char[] cc = this.getArray_as_char().clone();
+            case 17: char[] cc = Conv.copy(this.getArray_as_char());
                     for(int i=0; i<this.length; i++)am.array.add(new Character(cc[i]));
                     break;
-            case 18: String[] sss = this.getArray_as_String().clone();
+            case 18: String[] sss = Conv.copy(this.getArray_as_String());
                     for(int i=0; i<this.length; i++)am.array.add(sss[i]);
                     break;
         }
@@ -12244,16 +12253,167 @@ public class ArrayMaths{
                      am.sortedIndices = this.sortWithIndices(ii);
                      for(int i=0; i<this.length; i++)am.array.add((Character)this.array.get(am.sortedIndices[i]));
                      break;
-            case 18: throw new IllegalArgumentException("Alphabetic sorting is not supported by this method");
+            case 18: String[] ww = this.getArray_as_String();
+                     ArrayList<Object> al = this.alphabeticSort(ww);
+                     String[] www = (String[])al.get(0);
+                     for(int i=0; i<this.length; i++)am.array.add((String)www[i]);
+                     am.sortedIndices =  (int[])al.get(1);
+                     break;
             default: throw new IllegalArgumentException("Data type not identified by this method");
         }
-        int[] maxminIndices = new int[2];
-        ArrayMaths.findMinMax(am.getArray_as_Object(), am.minmax, maxminIndices, am.typeName, am.type);
-        am.maxIndex = maxminIndices[0];
-        am.minIndex = maxminIndices[1];
+        if(this.type!=18){
+            int[] maxminIndices = new int[2];
+            ArrayMaths.findMinMax(am.getArray_as_Object(), am.minmax, maxminIndices, am.typeName, am.type);
+            am.maxIndex = maxminIndices[0];
+            am.minIndex = maxminIndices[1];
+        }
 
         Conv.restoreMessages();
         return am;
+    }
+
+    // alphabetic sort
+    public ArrayList<Object> alphabeticSort(String[] words){
+
+        this.words = words;
+        this.nWords = words.length;
+
+        this.sortedWords = new String[this.nWords];
+        for(int i=0; i<this.nWords; i++)this.sortedWords[i] = this.words[i];
+
+        this.alphabeticSortIndices(words);
+
+        for(int i=0; i<this.nWords; i++){
+            sortedWords[i] = words[wordOrder[i]];
+        }
+
+        ArrayList<Object> ret = new ArrayList<Object>();
+        ret.add(sortedWords);
+        ret.add(wordOrder);
+
+        return ret;
+    }
+
+    // get sorted indices
+    public void alphabeticSortIndices(String[] words){
+
+        // copy and pad to longest word
+        String[] copy = new String[this.nWords];
+        this.nLength = 0;
+        int nn = 0;
+        for(int i=0; i<this.nWords; i++){
+            nn = words[i].length();
+            if(nn>this.nLength)this.nLength = nn;
+            copy[i] = words[i].toLowerCase();
+        }
+
+        // convert to character arrays
+        this.wordChar = new char[this.nWords][this.nLength];
+        this.holdWordChar = new char[this.nWords][this.nLength];
+        for(int i=0; i<this.nWords; i++){
+            char[] holdc = copy[i].toCharArray();
+            for(int j=0; j<copy[i].length(); j++){
+                this.wordChar[i][j] = holdc[j];
+                this.holdWordChar[i][j] = holdc[j];
+            }
+            for(int j=copy[i].length(); j<this.nLength; j++){
+                this.wordChar[i][j] = ' ';
+                this.holdWordChar[i][j] = ' ';
+            }
+        }
+
+        // set word order indices
+        this.wordOrder = new int[this.nWords];
+        this.holdWordOrder = new int[this.nWords];
+        for(int i=0; i<this.nWords; i++){
+            this.wordOrder[i] = i;
+            this.holdWordOrder[i] = i;
+        }
+
+        // sort characters
+        if(this.nWords>1)this.indexSort(0, 0, this.nWords-1);
+    }
+
+    public void indexSort(int ii, int iStart, int iEnd){
+
+        int n = iEnd - iStart + 1;
+        char[] colChar = new char[n];
+        int[] colInt = new int[n];
+        for(int i=0; i<n; i++){
+            colChar[i] = this.wordChar[i + iStart][ii];
+            colInt[i] = this.wordOrder[i + iStart];
+        }
+
+        int[] indChar = this.sortByColumnInitial(colChar);
+
+        int[] holdi = new int[n];
+        for(int i=0; i<n; i++){
+            holdi[i] = colInt[indChar[i]];
+        }
+
+
+
+        // rearrange words and their indices
+        for(int i=0; i<n; i++){
+            this.holdWordOrder[i+iStart] = holdi[i];
+            this.holdWordChar[i+iStart] = this.wordChar[indChar[i]+iStart];
+        }
+        for(int i=0; i<this.nWords; i++){
+            this.wordChar[i] = this.holdWordChar[i];
+            this.wordOrder[i] = this.holdWordOrder[i];
+        }
+
+
+        ArrayList<Integer> al = null;
+        if(ii<this.nLength-1){
+
+            int[] test = new int[n+1];
+            int one = 1;
+            test[0] = one;
+            int jj = 1;
+            for(int i=iStart+1; i<=iEnd; i++){
+                if((int)this.wordChar[i][ii]==(int)this.wordChar[i-1][ii]){
+                    test[jj] = one;
+                }
+                else{
+                    one = -one;
+                    test[jj] = one;
+                }
+                jj++;
+            }
+
+            al = new ArrayList<Integer>();
+            jj = iStart;
+            al.add(new Integer(jj));
+            for(int i=1; i<=n; i++){
+                jj++;
+                if(test[i]!=test[i-1]){
+                    al.add(new Integer(jj-1));
+                    al.add(new Integer(jj));
+                }
+            }
+            al.add(new Integer(iEnd));
+
+            int nSub = al.size();
+            for(int i=0; i<nSub; i+=2){
+                int vs = (al.get(i)).intValue();
+                int ve = (al.get(i+1)).intValue();
+                if((ve-vs+1)>1)this.indexSort(ii+1, vs, ve);
+            }
+        }
+    }
+
+    // sort by initial letter
+    public int[] sortByColumnInitial(char[] initials){
+        int n = initials.length;
+        int[] intChar = new int[n];
+        for(int i=0; i<n; i++)intChar[i] = (int)initials[i];
+        ArrayMaths ami = new ArrayMaths(intChar);
+        ArrayMaths isorted = ami.sort();
+        int[] iarraysorted = isorted.array_as_int();
+        int[] iindices = isorted.originalIndices();
+
+        return iindices;
     }
 
     // order an array to a given sequence of indices

@@ -16,7 +16,7 @@
 *
 *       Created: August 2002
 *	    Updated: 17 July 2003, 18 May 2005, 6 April 2008, 6 October 2009, 30 October 2009,
-*       2-9 November 2009, 20 January 2010, 23-25 May 2010, 3 June 2010
+*       2-9 November 2009, 20 January 2010, 23-25 May 2010, 3 June 2010, 18 January 2011
 *
 *
 *       DOCUMENTATION:
@@ -24,7 +24,7 @@
 *       http://www.ee.ucl.ac.uk/~mflanaga/java/BlackBox.html
 *       http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-* Copyright (c) 2002 - 2010  Michael Thomas Flanagan
+* Copyright (c) 2002 - 2011  Michael Thomas Flanagan
 *
 * PERMISSION TO COPY:
 *
@@ -48,6 +48,7 @@
 package flanagan.control;
 
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 import flanagan.complex.*;
 import flanagan.plot.Plot;
 import flanagan.plot.PlotGraph;
@@ -688,8 +689,8 @@ public class BlackBox{
                 if(this.time!=null){
                     int holdS = this.sampLen;
                     this.sampLen = (int)Math.round(time[this.sampLen-1]/this.deltaT);
-                    double[] holdT = time.clone();
-                    double[] holdI = inputT.clone();
+                    double[] holdT = Conv.copy(time);
+                    double[] holdI = Conv.copy(inputT);
                     this.time = new double[this.sampLen];
                     this.inputT = new double[this.sampLen];
                     CubicSpline cs = new CubicSpline(holdT, holdI);
@@ -810,8 +811,8 @@ public class BlackBox{
                 this.sampLen=samplen;
                 if(this.time!=null){
                     this.deltaT = this.time[holdS-1]/(samplen-1);
-                    double[] holdT = time.clone();
-                    double[] holdI = inputT.clone();
+                    double[] holdT = Conv.copy(time);
+                    double[] holdI = Conv.copy(inputT);
                     this.time = new double[this.sampLen];
                     this.inputT = new double[this.sampLen];
                     CubicSpline cs = new CubicSpline(holdT, holdI);
@@ -928,7 +929,6 @@ public class BlackBox{
                 this.sDenomScaleFactor = this.sDenom.coeffCopy(0);
             }
         }
-
         if(this.sNumerPade!=null){
             if(this.sNumerPade.getDeg()>0)this.sZerosPade = this.sNumerPade.rootsNoMessages();
         }
@@ -2124,9 +2124,9 @@ public class BlackBox{
     public void copyBBvariables(BlackBox bb){
 
             bb.sampLen = this.sampLen;
-            bb.inputT = this.inputT.clone();
-            bb.outputT = this.outputT.clone();
-            bb.time = this.time.clone();
+            bb.inputT = Conv.copy(this.inputT);
+            bb.outputT = Conv.copy(this.outputT);
+            bb.time = Conv.copy(this.time);
             bb.forgetFactor = this.forgetFactor;
             bb.deltaT = this.deltaT;
             bb.sampFreq = this.sampFreq;

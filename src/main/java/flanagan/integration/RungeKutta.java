@@ -40,6 +40,8 @@
 
 package flanagan.integration;
 
+import flanagan.math.Conv;
+
 
 // Class for Runge-Kutta solution of ordinary differential equations
 public class RungeKutta{
@@ -414,7 +416,7 @@ public class RungeKutta{
                     	    stepUsed*=delta;
                     	}
                 		if(x+stepUsed > this.xn)stepUsed = this.xn-x;
-                		y = (double[])y5.clone();
+                		y = Conv.copy(y5);
             		}
              		else{
                 		delta = RungeKutta.safetyFactor*Math.pow(maxerr,RungeKutta.decrementFactor);
@@ -612,7 +614,7 @@ public class RungeKutta{
                     	    stepUsed*=delta;
                     	}
                 		if(x+stepUsed > this.xn)stepUsed = this.xn-x;
-                		y = (double[])y5.clone();
+                		y = Conv.copy(y5);
             		}
              		else{
                 		delta = RungeKutta.safetyFactor*Math.pow(maxerr,RungeKutta.decrementFactor);

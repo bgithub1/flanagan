@@ -38,6 +38,7 @@ package flanagan.optics;
 
 import flanagan.complex.*;
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 import flanagan.plot.*;
 import flanagan.analysis.*;
 import java.util.ArrayList;
@@ -266,7 +267,7 @@ public class Reflectivity{
         Fmath.selectionSort(incidentAngle, this.incidentAngleDeg, this.incidentAngleIndices);
         if(this.experimentalDataSet){
             if(this.numberOfDataPoints!=this.numberOfIncidentAngles)throw new IllegalArgumentException("Number of experimental reflectivities " + this.numberOfDataPoints + " does not equal the number of incident angles " + this.numberOfIncidentAngles);
-            double[] temp = this.experimentalData.clone();
+            double[] temp = Conv.copy(this.experimentalData);
             for(int i=0; i<this.numberOfIncidentAngles;i++)this.experimentalData[i] = temp[this.incidentAngleIndices[i]];
         }
         this.incidentAngleRad = new double[this.numberOfIncidentAngles];
@@ -2709,8 +2710,8 @@ public class Reflectivity{
         if(this.numberOfDataPoints!=errors.length)throw new IllegalArgumentException("Number of data points, " + this.numberOfDataPoints + " is not equal to the number of errors (weights), " + errors.length + ".");
         if(this.incidentAngleSet){
             if(this.numberOfDataPoints!=this.numberOfIncidentAngles)throw new IllegalArgumentException("Number of experimental reflectivities " + this.numberOfDataPoints + " does not equal the number of incident angles " + this.numberOfIncidentAngles);
-            double[] temp0 = experimentalReflectivities.clone();
-            double[] temp1 = errors.clone();
+            double[] temp0 = Conv.copy(experimentalReflectivities);
+            double[] temp1 = Conv.copy(errors);
             for(int i=0; i<this.numberOfIncidentAngles;i++){
                 this.experimentalData[i] = temp0[this.incidentAngleIndices[i]];
                 this.experimentalWeights[i] = temp1[this.incidentAngleIndices[i]];
@@ -2774,8 +2775,8 @@ public class Reflectivity{
         if(this.numberOfDataPoints!=errors.length)throw new IllegalArgumentException("Number of data points, " + this.numberOfDataPoints + " is not equal to the number of errors (weights), " + errors.length + ".");
         if(this.incidentAngleSet){
             if(this.numberOfDataPoints!=this.numberOfIncidentAngles)throw new IllegalArgumentException("Number of experimental transmissivities " + this.numberOfDataPoints + " does not equal the number of incident angles " + this.numberOfIncidentAngles);
-            double[] temp0 = experimentalTransmissivities.clone();
-            double[] temp1 = errors.clone();
+            double[] temp0 = Conv.copy(experimentalTransmissivities);
+            double[] temp1 = Conv.copy(errors);
             for(int i=0; i<this.numberOfIncidentAngles;i++){
                 this.experimentalData[i] = temp0[this.incidentAngleIndices[i]];
                 this.experimentalWeights[i] = temp1[this.incidentAngleIndices[i]];
@@ -2861,8 +2862,8 @@ public class Reflectivity{
 
         if(this.incidentAngleSet){
             if(this.numberOfDataPoints!=this.numberOfIncidentAngles)throw new IllegalArgumentException("Number of experimental transmissivities " + this.numberOfDataPoints + " does not equal the number of incident angles " + this.numberOfIncidentAngles);
-            double[] temp0 = experimentalEvanescentFieldIntensities.clone();
-            double[] temp1 = errors.clone();
+            double[] temp0 = Conv.copy(experimentalEvanescentFieldIntensities);
+            double[] temp1 = Conv.copy(errors);
             for(int i=0; i<this.numberOfIncidentAngles;i++){
                 this.experimentalData[i] = temp0[this.incidentAngleIndices[i]];
                 this.experimentalWeights[i] = temp1[this.incidentAngleIndices[i]];

@@ -8,30 +8,24 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       19 June 2003
-*   MODIFIED:   25 June 2005, 27 June 2007, 21/22 July 2007, 10 September 2010, 31 Ocober 2010
+*   MODIFIED:   25 June 2005, 27 June 2007, 21/22 July 2007, 10 September 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/Db.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2003 - 2010 Michael Thomas Flanagan
+*   Copyright (c) June 2003, July 2010
 *
 *   PERMISSION TO COPY:
+*   Permission to use, copy and modify this software and its documentation for
+*   NON-COMMERCIAL purposes is granted, without fee, provided that an acknowledgement
+*   to the author, Michael Thomas Flanagan at www.ee.ucl.ac.uk/~mflanaga, appears in all copies.
 *
-* Permission to use, copy and modify this software and its documentation for NON-COMMERCIAL purposes is granted, without fee,
-* provided that an acknowledgement to the author, Dr Michael Thomas Flanagan at www.ee.ucl.ac.uk/~mflanaga, appears in all copies
-* and associated documentation or publications.
-*
-* Redistributions of the source code of this source code, or parts of the source codes, must retain the above copyright notice, this list of conditions
-* and the following disclaimer and requires written permission from the Michael Thomas Flanagan:
-*
-* Redistribution in binary form of all or parts of this class must reproduce the above copyright notice, this list of conditions and
-* the following disclaimer in the documentation and/or other materials provided with the distribution and requires written permission from the Michael Thomas Flanagan:
-*
-* Dr Michael Thomas Flanagan makes no representations about the suitability or fitness of the software for any or for a particular purpose.
-* Dr Michael Thomas Flanagan shall not be liable for any damages suffered as a result of using, modifying or distributing this software
-* or its derivatives.
+*   Dr Michael Thomas Flanagan makes no representations about the suitability
+*   or fitness of the software for any or for a particular purpose.
+*   Michael Thomas Flanagan shall not be liable for any damages suffered
+*   as a result of using, modifying or distributing this software or its derivatives.
 *
 ***************************************************************************************/
 
@@ -49,22 +43,7 @@ import flanagan.circuits.Phasor;
 import flanagan.math.Fmath;
 
 public class Db{
-
-        private static boolean inputTypeInfo = true;    // = true:  Db read input box includes a type needed message
-                                                        // = false: Db read input box does not includes a type needed message
-
-        // Set input type info option
-        public static void setTypeInfoOption(int opt){
-            switch(opt){
-                case 1: Db.inputTypeInfo = true;
-                        break;
-                case 2: Db.inputTypeInfo = false;
-                        break;
-                default: throw new IllegalArgumentException("Option " + opt + " not recognised");
-            }
-        }
-
-
+    /*
         // Reads a double from a dialog box with a prompt message
         // No default option
         public static final synchronized double readDouble(String mess){
@@ -72,8 +51,7 @@ public class Db{
                 double d=0.0D;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: double\n";
+                String mess0 = "Input type: double\n";
 
                 while(!finish){
                         line = JOptionPane.showInputDialog(mess0+mess);
@@ -96,8 +74,7 @@ public class Db{
                 double d=0.0D;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: double\n";
+                String mess0 = "Input type: double\n";
                 mess = mess + "\n";
                 String dfltmess = dflt + "";
 
@@ -154,8 +131,7 @@ public class Db{
                 String line="";
                 Complex c = new Complex();
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: Complex (x + jy)\n";
+                String mess0 = "Input type: Complex (x + jy)\n";
 
                 System.out.flush();
 
@@ -179,8 +155,7 @@ public class Db{
                 String line="";
                 Complex c = new Complex();
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: Complex (x + jy)\n";
+                String mess0 = "Input type: Complex (x + jy)\n";
                 String dfltmess = dflt+"";
                 mess = mess + "\n";
 
@@ -214,8 +189,7 @@ public class Db{
                 String line="";
                 Complex c = new Complex();
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: Complex (x + jy)\n";
+                String mess0 = "Input type: Complex (x + jy)\n";
                 String dfltmess = dflt;
                 mess = mess + "\n";
 
@@ -275,9 +249,7 @@ public class Db{
                 String line="";
                 Phasor ph = new Phasor();
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: Phasor ('mag'<'phase'deg or 'mag'<'phase'rad)\n";
-
+                String mess0 = "Input type: Phasor ('mag'<'phase'deg or 'mag'<'phase'rad)\n";
 
                 System.out.flush();
 
@@ -301,8 +273,7 @@ public class Db{
                 String line="";
                 Phasor ph = new Phasor();
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: Phasor ('mag'<'phase'deg or 'mag'<'phase'rad)\n";
+                String mess0 = "Input type: Phasor ('mag'<'phase'deg or 'mag'<'phase'rad)\n";
                 String dfltmess = dflt+"";
                 mess = mess + "\n";
 
@@ -336,8 +307,7 @@ public class Db{
                 String line="";
                 Phasor ph = new Phasor();
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: Phasor ('mag'<'phase'deg or 'mag'<'phase'rad)\n";
+                String mess0 = "Input type: Phasor ('mag'<'phase'deg or 'mag'<'phase'rad)\n";
                 String dfltmess = dflt;
                 mess = mess + "\n";
 
@@ -398,8 +368,7 @@ public class Db{
                 float d=0.0F;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: float\n";
+                String mess0 = "Input type: float\n";
 
                 while(!finish){
                         line = JOptionPane.showInputDialog(mess0+mess);
@@ -422,8 +391,7 @@ public class Db{
                 float d=0.0F;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: float\n";
+                String mess0 = "Input type: float\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -481,8 +449,7 @@ public class Db{
                 int d=0;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: int\n";
+                String mess0 = "Input type: int\n";
 
                 while(!finish){
                         line = JOptionPane.showInputDialog(mess0+mess);
@@ -504,8 +471,7 @@ public class Db{
                 String line="";
                 int d=0;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: int\n";
+                String mess0 = "Input type: int\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -563,8 +529,8 @@ public class Db{
                 String line="";
                 long d=0L;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: long\n";
+                String mess0 = "Input type: long\n";
+
                 System.out.flush();
 
                 while(!finish){
@@ -587,8 +553,7 @@ public class Db{
                 String line="";
                 long d=0L;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: long\n";
+                String mess0 = "Input type: long\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -646,8 +611,7 @@ public class Db{
                 String line="";
                 long d=0;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: short\n";
+                String mess0 = "Input type: short\n";
 
                 System.out.flush();
 
@@ -671,8 +635,7 @@ public class Db{
                 String line="";
                 short d=0;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: short\n";
+                String mess0 = "Input type: short\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -730,8 +693,7 @@ public class Db{
                 String line="";
                 long d=0;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: short\n";
+                String mess0 = "Input type: short\n";
 
                 System.out.flush();
 
@@ -755,8 +717,7 @@ public class Db{
                 String line="";
                 byte d=0;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: byte\n";
+                String mess0 = "Input type: byte\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -815,8 +776,7 @@ public class Db{
                 String line="";
                 char d=' ';
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: char\n";
+                String mess0 = "Input type: char\n";
 
                 System.out.flush();
 
@@ -841,8 +801,7 @@ public class Db{
                 String line="";
                 char d = ' ';
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: char\n";
+                String mess0 = "Input type: char\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -897,8 +856,7 @@ public class Db{
         public static final synchronized String readLine(String mess){
                 String line="";
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: String [a line]\n";
+                String mess0 = "Input type: String [a line]\n";
 
                 System.out.flush();
 
@@ -916,8 +874,7 @@ public class Db{
         public static final synchronized String readLine(String mess, String dflt){
                 String line="";
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: String [a line]\n";
+                String mess0 = "Input type: String [a line]\n";
                 mess = mess +"\n";
                 String dfltmess = dflt + "";
 
@@ -962,9 +919,7 @@ public class Db{
                 boolean b=false;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input boolean\n";
-
+                String mess0 = "Input boolean\n";
                 mess = mess + "\n";
                 String dfltmess = dflt+"";
 
@@ -1001,8 +956,7 @@ public class Db{
                 boolean b=false;
                 boolean finish = false;
                 System.out.flush();
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input boolean\n";
+                String mess0 = "Input type: boolean\n";
 
                 while(!finish){
                         line = JOptionPane.showInputDialog(mess0+mess);
@@ -1055,8 +1009,7 @@ public class Db{
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
 
                 System.out.flush();
 
@@ -1080,8 +1033,7 @@ public class Db{
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
                 String dfltmess = dflt.toString()+"";
                 mess = mess + "\n";
 
@@ -1115,8 +1067,7 @@ public class Db{
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
                 String dfltmess = dflt;
                 mess = mess + "\n";
 
@@ -1151,8 +1102,7 @@ public class Db{
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
                 Double dfltD = new Double(dflt);
                 String dfltmess = dfltD.toString();
                 mess = mess + "\n";
@@ -1188,8 +1138,7 @@ public class Db{
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
                 Float dfltF = new Float(dflt);
                 String dfltmess = dfltF.toString();
                 mess = mess + "\n";
@@ -1225,8 +1174,7 @@ public class Db{
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
                 Long dfltF = new Long(dflt);
                 String dfltmess = dfltF.toString();
                 mess = mess + "\n";
@@ -1256,14 +1204,13 @@ public class Db{
                 return big;
         }
 
-        // Reads a BigDecimal from a dialog box with a prompt message and the return
+// Reads a BigDecimal from a dialog box with a prompt message and the return
         // of a default option if the return key alone is pressed - int default
         public static final synchronized BigDecimal readBigDecimal(String mess, int dflt){
                 String line="";
                 BigDecimal big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigDecimal\n";
+                String mess0 = "Input type: BigDecimal\n";
                 Integer dfltF = new Integer(dflt);
                 String dfltmess = dfltF.toString();
                 mess = mess + "\n";
@@ -1322,8 +1269,7 @@ public class Db{
                 String line="";
                 BigInteger big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigInteger\n";
+                String mess0 = "Input type: BigInteger\n";
 
                 System.out.flush();
 
@@ -1347,8 +1293,7 @@ public class Db{
                 String line="";
                 BigInteger big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigInteger\n";
+                String mess0 = "Input type: BigInteger\n";
                 String dfltmess = dflt.toString()+"";
                 mess = mess + "\n";
 
@@ -1382,8 +1327,7 @@ public class Db{
                 String line="";
                 BigInteger big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigInteger\n";
+                String mess0 = "Input type: BigInteger\n";
                 String dfltmess = dflt;
                 mess = mess + "\n";
 
@@ -1418,8 +1362,7 @@ public class Db{
                 String line="";
                 BigInteger big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigInteger\n";
+                String mess0 = "Input type: BigInteger\n";
                 Long dfltF = new Long(dflt);
                 String dfltmess = dfltF.toString();
                 mess = mess + "\n";
@@ -1455,8 +1398,7 @@ public class Db{
                 String line="";
                 BigInteger big = null;
                 boolean finish = false;
-                String mess0 = "";
-                if(Db.inputTypeInfo)mess0 = "Input type: BigInteger\n";
+                String mess0 = "Input type: BigInteger\n";
                 Integer dfltF = new Integer(dflt);
                 String dfltmess = dfltF.toString();
                 mess = mess + "\n";
@@ -1525,7 +1467,7 @@ public class Db{
             if(ans == 0)ansb =true;
             return ansb;
         }
-
+/*
 
         // Shows a message and the value of a double in a message dialogue box
         public static final synchronized void show(String message, double output){
@@ -1856,5 +1798,6 @@ public class Db{
                     JOptionPane.showMessageDialog(null, "Now you must press the appropriate escape key/s, e.g. Ctrl C, to exit this program");
                 }
         }
+*/
 }
 

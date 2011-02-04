@@ -15,7 +15,7 @@
 *   DATE:    February 2002
 *   UPDATED: 22 June 2003, 19 January 2005, 12 May 2005, 11 October 2005, 30 April 2007
 *            22 November 2007, 10-11 August 2008, 22 August 2008, 31 October 2009, 6 November 2009
-*            29 May 2010, 5-6 June 2010
+*            29 May 2010, 5-6 June 2010, 20 October 2010, 18-21 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
@@ -41,6 +41,8 @@ package flanagan.complex;
 
 import flanagan.io.FileOutput;
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
+import flanagan.math.ArrayMaths;
 import flanagan.math.Polynomial;
 import flanagan.circuits.Phasor;
 import flanagan.control.BlackBox;
@@ -375,6 +377,9 @@ public class ComplexPoly{
                         aa.coeff[i] = Complex.copy(this.coeff[i]);
                 }
                 aa.deg=this.deg;
+                aa.degwz = this.degwz;
+                aa.coeffwz = Conv.copy(this.coeffwz);
+
                 return aa;
             }
         }
@@ -390,26 +395,19 @@ public class ComplexPoly{
                         aa.coeff[i] = Complex.copy(bb.coeff[i]);
                 }
                 aa.deg=bb.deg;
+                aa.degwz = bb.degwz;
+                aa.coeffwz = Conv.copy(bb.coeffwz);
+
                 return aa;
             }
         }
 
         // Clone a ComplexPoly
         public Object clone(){
-            if(this==null){
-                return null;
-            }
-            else{
-                ComplexPoly aa = new ComplexPoly(this.deg);
-                for(int i=0; i<=this.deg; i++){
-                        aa.coeff[i] = Complex.copy(this.coeff[i]);
-                }
-                aa.deg=this.deg;
-                return (Object) aa;
-            }
+                return (Object) this.copy();
         }
 
-        // Return a copy of the polynomial
+        // Return a copy of the polynomial coefficients
         public Complex[] polyNomCopy(){
                 Complex[] aa = Complex.oneDarray(this.deg+1);
                 for(int i=0; i<=this.deg; i++){
@@ -506,45 +504,58 @@ public class ComplexPoly{
         }
 
         // TRANSFORM
-        // Transform a real polynomial to an s-Domain polynomial ratio
+        // Transform a Complex polynomial to an s-Domain polynomial ratio
+        // Argument:  coefficients of the real polynomial  a0 + a1.x + a2.x^2 + ....
+        // Returns ArrayList:
+        // First element: numertor as ComplexPoly
+        // Second element: denominator as ComplexPoly
+        public ArrayList<ComplexPoly> sTransform(){
+            return ComplexPoly.sTransform(this.coeff);
+        }
+
+        // TRANSFORM
+        // Transform a Complex polynomial to an s-Domain polynomial ratio
         // Argument:  coefficients of the real polynomial  a0 + a1.x + a2.x^2 + ....
         // Returns ArrayList:
         // First element: numertor as ComplexPoly
         // Second element: denominator as ComplexPoly
         public static ArrayList<ComplexPoly> sTransform(double[] coeff){
+            ArrayMaths am = new ArrayMaths(coeff);
+            Complex[] coeffc = am.getArray_as_Complex();
+            return ComplexPoly.sTransform(coeffc);
+        }
+
+        // TRANSFORM
+        // Transform a real polynomial to an s-Domain polynomial ratio
+        // Argument:  coefficients of the real polynomial  a0 + a1.x + a2.x^2 + ....
+        // Returns ArrayList:
+        // First element: numertor as ComplexPoly
+        // Second element: denominator as ComplexPoly
+        public static ArrayList<ComplexPoly> sTransform(Complex[] coeff){
             int n = coeff.length;
-            ComplexPoly[] sNum = new ComplexPoly[n];    // numerator of each transformed term
-            ComplexPoly[] sDen = new ComplexPoly[n];    // denomenator of each transformed term
-            ComplexPoly sNumer = new ComplexPoly(1);    // numerator of the completely transformed polynomial
-            ComplexPoly sDenom = new ComplexPoly(1);    // denomenator of the completely transformed polynomial
+            ComplexPoly[] sNum = new ComplexPoly[n];                    // numerator of each transformed term
+            ComplexPoly[] sDen = new ComplexPoly[n];                    // denomenator of each transformed term
+            ComplexPoly sNumer = null;                                  // numerator of the completely transformed polynomial
+            ComplexPoly sDenom = new ComplexPoly(Complex.plusOne());    // denomenator of the completely transformed polynomial
 
             // s-Transform of each term of the polynomial
-            Complex[] comN = Complex.oneDarray(1);
-            Complex[] comD = null;
             for(int i=0; i<n; i++){
-                comN[0] = new Complex(coeff[i]*Fmath.factorial(i), 0);
-                sNum[i].resetPoly(comN);
-                comD = Complex.oneDarray(i+1);
-                comD[i+1] = Complex.plusOne();
-                sDen[i].resetPoly(comD);
-            }
-            sNumer.resetCoeff(0, Complex.zero());
-            ComplexPoly hold0 = new ComplexPoly(1);
-            hold0.resetCoeff(0, Complex.plusOne());
-            ComplexPoly hold1 = null;
-            for(int i=0; i<n; i++){
-                hold1 = hold0.copy();
-                for(int j=0; j<n; j++){
-                    if(j!=i)hold1 = hold1.times(sDen[j]);
-                }
-                sNumer = sNumer.plus(hold1.times(sNum[i]));
+                sNum[i] = new ComplexPoly(coeff[i].times(new Complex(Fmath.factorial(i), 0)));
+                sDen[i] = new ComplexPoly(i+1);
+                sDen[i].resetCoeff(i+1, Complex.plusOne());
             }
 
-            sDenom.resetCoeff(0, Complex.plusOne());
-            for(int i=0; i<n; i++){
-                sDenom = sDenom.times(sDen[i]);
-            }
+            // create a common denomenator
+            sDenom = sDen[n-1];
 
+            // create a common numerator
+            for(int i=0; i<n-1; i++){
+                sNum[i] = sNum[i].times(sDen[n-i-2]);
+            }
+            sNumer = sNum[0];
+            for(int i=1; i<n; i++)sNumer = sNumer.plus(sNum[i]);
+
+            // Output arrayList
             ArrayList<ComplexPoly> al = new ArrayList<ComplexPoly>();
             al.add(sNumer);
             al.add(sDenom);
@@ -927,6 +938,9 @@ public class ComplexPoly{
 
         // Calculate the roots (real or complex) of a polynomial (real or complex)
         public Complex[] roots(boolean polish, Complex estx){
+
+                Complex[] roots = Complex.oneDarray(this.deg);
+
                 // degree = 0 - no roots
                 if(this.deg==0 && !this.suppressRootsErrorMessages){
                     System.out.println("degree of the polynomial is zero in the method ComplexPoly.roots");
@@ -936,16 +950,34 @@ public class ComplexPoly{
 
                 // Check for no roots, i.e all coefficients but the first = 0
                 int counter = 0;
-                for(int i=1; i<this.deg; i++){
+                for(int i=1; i<=this.deg; i++){
                     if(this.coeff[i].isZero())counter++;
                 }
-                if(counter==this.deg-1 && !this.suppressRootsErrorMessages){
+                if(counter==this.deg && !this.suppressRootsErrorMessages){
                     System.out.println("polynomial coefficients above the zeroth are all zero in the method ComplexPoly.roots");
                     System.out.println("null returned");
                     return null;
                 }
 
-                // check for zero roots
+                // Check for only one non-zero coefficient
+                int nonzerocoeff = 0;
+                int nonzeroindex = 0;
+                for(int i=0; i<=this.deg; i++){
+                    if(!this.coeff[i].isZero()){
+                        nonzerocoeff++;
+                        nonzeroindex = i;
+                    }
+                }
+                if(nonzerocoeff==1){
+                    System.out.println("all polynomial coefficients except a[" + nonzeroindex + "] are zero in the method ComplexPoly.roots");
+                    System.out.println("all roots returned as zero");
+                    for(int i=0; i<this.deg; i++){
+                        roots[i] = Complex.zero();
+                    }
+                    return roots;
+                }
+
+                // check for leading zeros
                 boolean testzero=true;
                 int ii=0, nzeros=0;
                 while(testzero){
@@ -967,8 +999,8 @@ public class ComplexPoly{
                     this.coeffwz = Complex.oneDarray(this.degwz+1);
                     for(int i=0; i<=this.degwz; i++)this.coeffwz[i] = this.coeff[i].copy();
                 }
+
                 // calculate non-zero roots
-                Complex[] roots = Complex.oneDarray(this.deg);
                 Complex[] root = Complex.oneDarray(this.degwz);
 
                 switch(this.degwz){

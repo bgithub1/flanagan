@@ -41,6 +41,7 @@ import flanagan.analysis.Regression;
 import flanagan.analysis.RegressionFunction2;
 import flanagan.analysis.Stat;
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 import flanagan.plot.*;
 
 import java.lang.reflect.Array;
@@ -267,14 +268,14 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=realWeight.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of real weights, " + realWeight.length);
         if(this.numberOfFrequencies!=imagWeight.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of imag weights, " + imagWeight.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
-        this.realV = (double[])real.clone();
-        this.imagV = (double[])imag.clone();
-        this.realVweights = (double[])realWeight.clone();
-        this.imagVweights = (double[])imagWeight.clone();
+        this.realV = Conv.copy(real);
+        this.imagV = Conv.copy(imag);
+        this.realVweights = Conv.copy(realWeight);
+        this.imagVweights = Conv.copy(imagWeight);
         this.voltageMagnitudes = new double[this.numberOfFrequencies];
         this.voltagePhasesDeg = new double[this.numberOfFrequencies];
         this.voltagePhasesRad = new double[this.numberOfFrequencies];
@@ -310,7 +311,7 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=voltages.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of voltages, " + voltages.length);
         if(this.numberOfFrequencies!=weights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of weights, " + weights.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
@@ -360,13 +361,13 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=voltageMagWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of magnitude weights, " + voltageMagWeights.length);
         if(this.numberOfFrequencies!=voltagePhaseWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of phase weights, " + voltagePhaseWeights.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
-        this.voltageMagnitudes = (double[])voltageMagnitudes.clone();
-        this.voltageMagnitudeWeights = (double[])voltageMagWeights.clone();
-        this.voltagePhaseWeightsRad = (double[])voltagePhaseWeights.clone();
+        this.voltageMagnitudes = Conv.copy(voltageMagnitudes);
+        this.voltageMagnitudeWeights = Conv.copy(voltageMagWeights);
+        this.voltagePhaseWeightsRad = Conv.copy(voltagePhaseWeights);
         this.voltages= Complex.oneDarray(this.numberOfFrequencies);
         this.voltagePhasesDeg = new double[this.numberOfFrequencies];
         this.realV = new double[this.numberOfFrequencies];
@@ -413,17 +414,17 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=voltageMagWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of magnitude weights, " + voltageMagWeights.length);
         if(this.numberOfFrequencies!=voltagePhaseWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of phase weights, " + voltagePhaseWeights.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
-        this.voltageMagnitudes = (double[])voltageMagnitudes.clone();
-        this.voltagePhasesDeg = (double[])voltagePhasesDeg.clone();
+        this.voltageMagnitudes = Conv.copy(voltageMagnitudes);
+        this.voltagePhasesDeg = Conv.copy(voltagePhasesDeg);
         this.voltages = Complex.oneDarray(this.numberOfFrequencies);
         this.voltagePhasesRad = new double[this.numberOfFrequencies];
         this.voltagePhaseWeightsRad = new double[this.numberOfFrequencies];
-        this.voltageMagnitudeWeights = (double[])voltageMagWeights.clone();
-        this.voltagePhaseWeightsDeg = (double[])voltagePhaseWeights.clone();
+        this.voltageMagnitudeWeights = Conv.copy(voltageMagWeights);
+        this.voltagePhaseWeightsDeg = Conv.copy(voltagePhaseWeights);
         this.realV = new double[this.numberOfFrequencies];
         this.imagV = new double[this.numberOfFrequencies];
         this.realVweights = new double[this.numberOfFrequencies];
@@ -470,14 +471,14 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=realWeight.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of real weights, " + realWeight.length);
         if(this.numberOfFrequencies!=imagWeight.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of imag weights, " + imagWeight.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
-        this.realZ = (double[])real.clone();
-        this.imagZ = (double[])imag.clone();
-        this.realZweights = (double[])realWeight.clone();
-        this.imagZweights = (double[])imagWeight.clone();
+        this.realZ = Conv.copy(real);
+        this.imagZ = Conv.copy(imag);
+        this.realZweights = Conv.copy(realWeight);
+        this.imagZweights = Conv.copy(imagWeight);
         this.impedanceMagnitudes = new double[this.numberOfFrequencies];
         this.impedancePhasesDeg = new double[this.numberOfFrequencies];
         this.impedancePhasesRad = new double[this.numberOfFrequencies];
@@ -511,7 +512,7 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=impedances.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of impedances, " + impedances.length);
         if(this.numberOfFrequencies!=weights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of weights, " + weights.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
@@ -560,13 +561,13 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=impedanceMagWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of magnitude weights, " + impedanceMagWeights.length);
         if(this.numberOfFrequencies!=impedancePhaseWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of phase weights, " + impedancePhaseWeights.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
-        this.impedanceMagnitudes = (double[])impedanceMagnitudes.clone();
-        this.impedanceMagnitudeWeights = (double[])impedanceMagWeights.clone();
-        this.impedancePhaseWeightsRad = (double[])impedancePhaseWeights.clone();
+        this.impedanceMagnitudes = Conv.copy(impedanceMagnitudes);
+        this.impedanceMagnitudeWeights = Conv.copy(impedanceMagWeights);
+        this.impedancePhaseWeightsRad = Conv.copy(impedancePhaseWeights);
         this.impedances= Complex.oneDarray(this.numberOfFrequencies);
         this.impedancePhasesDeg = new double[this.numberOfFrequencies];
         this.realZ = new double[this.numberOfFrequencies];
@@ -612,17 +613,17 @@ public class ImpedSpecRegression extends Regression{
         if(this.numberOfFrequencies!=impedanceMagWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of magnitude weights, " + impedanceMagWeights.length);
         if(this.numberOfFrequencies!=impedancePhaseWeights.length)throw new IllegalArgumentException("The number of frequencies, " + this.numberOfFrequencies + ", does not equal the number of phase weights, " + impedancePhaseWeights.length);
 
-        this.frequencies = (double[])frequencies.clone();
+        this.frequencies = Conv.copy(frequencies);
         this.setAllFrequencyArrays();
         this.setCalculatedArrayLengths();
 
-        this.impedanceMagnitudes = (double[])impedanceMagnitudes.clone();
-        this.impedancePhasesDeg = (double[])impedancePhasesDeg.clone();
+        this.impedanceMagnitudes = Conv.copy(impedanceMagnitudes);
+        this.impedancePhasesDeg = Conv.copy(impedancePhasesDeg);
         this.impedances = Complex.oneDarray(this.numberOfFrequencies);
         this.impedancePhasesRad = new double[this.numberOfFrequencies];
         this.impedancePhaseWeightsRad = new double[this.numberOfFrequencies];
-        this.impedanceMagnitudeWeights = (double[])impedanceMagWeights.clone();
-        this.impedancePhaseWeightsDeg = (double[])impedancePhaseWeights.clone();
+        this.impedanceMagnitudeWeights = Conv.copy(impedanceMagWeights);
+        this.impedancePhaseWeightsDeg = Conv.copy(impedancePhaseWeights);
         this.realZ = new double[this.numberOfFrequencies];
         this.imagZ = new double[this.numberOfFrequencies];
         this.realZweights = new double[this.numberOfFrequencies];
@@ -1316,8 +1317,8 @@ public class ImpedSpecRegression extends Regression{
         this.results.add(new Integer(this.numberOfParameters));
         this.results.add(new Integer(this.degreesOfFreedom));
         this.results.add(this.parameterSymbols);
-        this.results.add((double[])this.initialEstimates.clone());
-        this.results.add((double[])this.initialSteps.clone());
+        this.results.add(Conv.copy(this.initialEstimates));
+        this.results.add(Conv.copy(this.initialSteps));
 
         // Enter regression data
         if(this.weightsSet){
@@ -1387,7 +1388,7 @@ public class ImpedSpecRegression extends Regression{
         }
 
         // perform regression
-        this.simplex2(this.regressionFunction, (double[])this.initialEstimates.clone(), (double[])this.initialSteps.clone(), this.tolerance, this.maximumIterations);
+        this.simplex2(this.regressionFunction, Conv.copy(this.initialEstimates), Conv.copy(this.initialSteps), this.tolerance, this.maximumIterations);
 
         // repeat regression with best estimates as new initial estimates
         this.numberOfIterations1 = this.getNiter();

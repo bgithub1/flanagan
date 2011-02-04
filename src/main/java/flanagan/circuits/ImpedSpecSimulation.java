@@ -36,6 +36,7 @@ import flanagan.circuits.Impedance;
 import flanagan.io.*;
 import flanagan.complex.Complex;
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 import flanagan.plot.*;
 
 import java.text.*;
@@ -409,28 +410,28 @@ public class ImpedSpecSimulation{
 
         double[] hold = new double[nPoints];
         for(int i=0; i<nPoints; i++)hold[i] = realZ[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = imagZ[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = magnitudesZ[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = phasesDegZ[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = phasesRadZ[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = frequencies[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = log10frequencies[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = omegas[points[i]];
-        selectedData.add((double[])hold.clone());
+        selectedData.add(Conv.copy(hold));
 
         if(this.voltageSet && this.referenceSet){
             selectedData.add(new Double(this.appliedVoltage.getReal()));
@@ -441,19 +442,19 @@ public class ImpedSpecSimulation{
             selectedData.add(Complex.copy(imp));
 
             for(int i=0; i<nPoints; i++)hold[i] = realV[points[i]];
-            selectedData.add((double[])hold.clone());
+            selectedData.add(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = imagV[points[i]];
-            selectedData.add((double[])hold.clone());
+            selectedData.add(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = magnitudesV[points[i]];
-            selectedData.add((double[])hold.clone());
+            selectedData.add(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = phasesDegV[points[i]];
-            selectedData.add((double[])hold.clone());
+            selectedData.add(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = phasesRadV[points[i]];
-            selectedData.add((double[])hold.clone());
+            selectedData.add(Conv.copy(hold));
         }
         else{
             for(int i=0; i<8; i++)selectedData.add(null);
@@ -489,28 +490,28 @@ public class ImpedSpecSimulation{
 
         double[] hold = new double[nPoints];
         for(int i=0; i<nPoints; i++)hold[i] = realZ[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = imagZ[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = magnitudesZ[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = phasesDegZ[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = phasesRadZ[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = frequencies[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = log10frequencies[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         for(int i=0; i<nPoints; i++)hold[i] = omegas[points[i]];
-        vec.addElement((double[])hold.clone());
+        vec.addElement(Conv.copy(hold));
 
         if(this.voltageSet && this.referenceSet){
             vec.addElement(new Double(this.appliedVoltage.getReal()));
@@ -521,19 +522,19 @@ public class ImpedSpecSimulation{
             vec.addElement(Complex.copy(imp));
 
             for(int i=0; i<nPoints; i++)hold[i] = realV[points[i]];
-            vec.addElement((double[])hold.clone());
+            vec.addElement(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = imagV[points[i]];
-            vec.addElement((double[])hold.clone());
+            vec.addElement(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = magnitudesV[points[i]];
-            vec.addElement((double[])hold.clone());
+            vec.addElement(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = phasesDegV[points[i]];
-            vec.addElement((double[])hold.clone());
+            vec.addElement(Conv.copy(hold));
 
             for(int i=0; i<nPoints; i++)hold[i] = phasesRadV[points[i]];
-            vec.addElement((double[])hold.clone());
+            vec.addElement(Conv.copy(hold));
         }
         else{
             for(int i=0; i<8; i++)vec.addElement(null);

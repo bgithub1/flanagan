@@ -15,6 +15,8 @@
 *           21 September 2008
 *           14 January 2009 - point deletion and check for 3 points reordered (Thanks to Jan Sacha, Vrije Universiteit Amsterdam)
 *           31 October 2009, 11-14 January 2010
+*           31 August 2010 - overriding natural spline error, introduced in earlier update, corrected (Thanks to Dagmara Oszkiewicz, University of Helsinki)
+*           2 February 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
@@ -46,31 +48,34 @@
 package flanagan.interpolation;
 
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 
 public class CubicSpline{
 
-    	private int nPoints = 0;                            // no. of tabulated points
-    	private int nPointsOriginal = 0;                    // no. of tabulated points after any deletions of identical points
-    	private double[] y = null;                          // y=f(x) tabulated function
-    	private double[] x = null;                          // x in tabulated function f(x)
-    	private double yy = Double.NaN;                     // interpolated value of y
-    	private double dydx = Double.NaN;                   // interpolated value of the first derivative, dy/dx
-    	private int[]newAndOldIndices;                      // record of indices on ordering x into ascending order
-    	private double xMin = Double.NaN;                   // minimum x value
-    	private double xMax = Double.NaN;                   // maximum x value
-    	private double range = Double.NaN;                  // xMax - xMin
-    	private double[] d2ydx2 = null;                     // second derivatives of y
-    	private double yp1 = Double.NaN;                    // first derivative at point one
-                                    	                    // default value = NaN (natural spline)
-    	private double ypn = Double.NaN;                    // first derivative at point n
-                                    	                    // default value = NaN (natural spline)
-        private boolean derivCalculated = false;            // = true when the derivatives have been calculated
+    	private int nPoints = 0;                                    // no. of tabulated points
+    	private int nPointsOriginal = 0;                            // no. of tabulated points after any deletions of identical points
+    	private double[] y = null;                                  // y=f(x) tabulated function
+    	private double[] x = null;                                  // x in tabulated function f(x)
+    	private double yy = Double.NaN;                             // interpolated value of y
+    	private double dydx = Double.NaN;                           // interpolated value of the first derivative, dy/dx
+    	private int[]newAndOldIndices;                              // record of indices on ordering x into ascending order
+    	private double xMin = Double.NaN;                           // minimum x value
+    	private double xMax = Double.NaN;                           // maximum x value
+    	private double range = Double.NaN;                          // xMax - xMin
+    	private double[] d2ydx2 = null;                             // second derivatives of y
+    	private double yp1 = Double.NaN;                            // second derivative at point one
+                                    	                            // default value = NaN (natural spline)
+    	private double ypn = Double.NaN;                            // second derivative at point n
+                                    	                            // default value = NaN (natural spline)
+        private boolean derivCalculated = false;                    // = true when the derivatives have been calculated
 
-        private boolean checkPoints = false;                    // = true when points checked for identical values
-        private boolean averageIdenticalAbscissae = false;      // if true: the the ordinate values for identical abscissae are averaged
-                                                                // if false: the abscissae values are separated by 0.001 of the total abscissae range;
-        private static double potentialRoundingError = 5e-15;   // potential rounding error used in checking wheter a value lies within the interpolation bounds
-        private static boolean roundingCheck = true;            // = true: points outside the interpolation bounds by less than the potential rounding error rounded to the bounds limit
+        private boolean checkPoints = false;                        // = true when points checked for identical values
+        private static boolean supress = false;                     // if true: warning messages supressed
+
+        private static boolean averageIdenticalAbscissae = false;   // if true: the the ordinate values for identical abscissae are averaged
+                                                                    // if false: the abscissae values are separated by 0.001 of the total abscissae range;
+        private static double potentialRoundingError = 5e-15;       // potential rounding error used in checking wheter a value lies within the interpolation bounds
+        private static boolean roundingCheck = true;                // = true: points outside the interpolation bounds by less than the potential rounding error rounded to the bounds limit
 
 
     	// Constructors
@@ -88,6 +93,7 @@ public class CubicSpline{
             		this.y[i]=y[i];
         	}
         	this.orderPoints();
+    	    this.checkForIdenticalPoints();
 	    	this.calcDeriv();
 
     	}
@@ -130,13 +136,14 @@ public class CubicSpline{
             		this.y[i]=y[i];
         	}
         	this.orderPoints();
+        	this.checkForIdenticalPoints();
     	}
 
         // Reset the default handing of identical abscissae with different ordinates
         // from the default option of separating the two relevant abscissae by 0.001 of the range
-        // to avraging the relevant ordinates
-    	public void averageIdenticalAbscissae(){
-    	    this.averageIdenticalAbscissae = true;
+        // to averaging the relevant ordinates
+    	public static void averageIdenticalAbscissae(){
+    	    CubicSpline.averageIdenticalAbscissae = true;
     	}
 
     	// Sort points into an ascending abscissa order
@@ -188,41 +195,56 @@ public class CubicSpline{
     	        while(test2){
     	            if(this.x[ii]==this.x[jj]){
     	                if(this.y[ii]==this.y[jj]){
-    	                    System.out.print("CubicSpline: Two identical points, " + this.x[ii] + ", " + this.y[ii]);
-    	                    System.out.println(", in data array at indices " + this.newAndOldIndices[ii] + " and " +  this.newAndOldIndices[jj] + ", latter point removed");
-
-    	                    for(int i=jj; i<nP-1; i++){
-    	                        this.x[i] = this.x[i+1];
-    	                        this.y[i] = this.y[i+1];
-    	                        this.newAndOldIndices[i-1] = this.newAndOldIndices[i];
-    	                    }
-    	                    nP--;
-    	                    for(int i=nP; i<this.nPoints; i++){
-    	                        this.x[i] = Double.NaN;
-    	                        this.y[i] = Double.NaN;
-    	                        this.newAndOldIndices[i-1] = -1000;
-    	                    }
+    	                    if(!CubicSpline.supress){
+    	                        System.out.print("CubicSpline: Two identical points, " + this.x[ii] + ", " + this.y[ii]);
+    	                        System.out.println(", in data array at indices " + this.newAndOldIndices[ii] + " and " +  this.newAndOldIndices[jj] + ", latter point removed");
+                            }
+                            double[] xx = new double[this.nPoints-1];
+                            double[] yy = new double[this.nPoints-1];
+                            int[] naoi = new int[this.nPoints-1];
+                            for(int i=0; i<jj; i++){
+                                xx[i] = this.x[i];
+                                yy[i] = this.y[i];
+                                naoi[i] = this.newAndOldIndices[i];
+                            }
+                            for(int i=jj; i<this.nPoints-1; i++){
+                                xx[i] = this.x[i+1];
+                                yy[i] = this.y[i+1];
+                                naoi[i] = this.newAndOldIndices[i+1];
+                            }
+                            this.nPoints--;
+                            this.x = Conv.copy(xx);
+                            this.y = Conv.copy(yy);
+                            this.newAndOldIndices = Conv.copy(naoi);
     	                }
     	                else{
-    	                    if(this.averageIdenticalAbscissae==true){
-    	                        System.out.print("CubicSpline: Two identical points on the absicca (x-axis) with different ordinate (y-axis) values, " + x[ii] + ": " + y[ii] + ", " + y[jj]);
-    	                        System.out.println(", average of the ordinates taken");
+    	                    if(CubicSpline.averageIdenticalAbscissae==true){
+    	                        if(!CubicSpline.supress){
+    	                            System.out.print("CubicSpline: Two identical points on the absicca (x-axis) with different ordinate (y-axis) values, " + x[ii] + ": " + y[ii] + ", " + y[jj]);
+    	                            System.out.println(", average of the ordinates taken");
+    	                        }
     	                        this.y[ii] = (this.y[ii] + this.y[jj])/2.0D;
-    	                        for(int i=jj; i<nP-1; i++){
-    	                            this.x[i] = this.x[i+1];
-    	                            this.y[i] = this.y[i+1];
-    	                            this.newAndOldIndices[i-1] = this.newAndOldIndices[i];
-    	                        }
-    	                        nP--;
-    	                        for(int i=nP; i<this.nPoints; i++){
-    	                            this.x[i] = Double.NaN;
-    	                            this.y[i] = Double.NaN;
-    	                            this.newAndOldIndices[i-1] = -1000;
-    	                        }
+    	                        double[] xx = new double[this.nPoints-1];
+                                double[] yy = new double[this.nPoints-1];
+                                int[] naoi = new int[this.nPoints-1];
+    	                        for(int i=0; i<jj; i++){
+                                    xx[i] = this.x[i];
+                                    yy[i] = this.y[i];
+                                    naoi[i] = this.newAndOldIndices[i];
+                                }
+                                for(int i=jj; i<this.nPoints-1; i++){
+                                    xx[i] = this.x[i+1];
+                                    yy[i] = this.y[i+1];
+                                    naoi[i] = this.newAndOldIndices[i+1];
+                                }
+                                this.nPoints--;
+                                this.x = Conv.copy(xx);
+                                this.y = Conv.copy(yy);
+                                this.newAndOldIndices = Conv.copy(naoi);
     	                    }
     	                    else{
     	                        double sepn = range*0.0005D;
-    	                        System.out.print("CubicSpline: Two identical points on the absicca (x-axis) with different ordinate (y-axis) values, " + x[ii] + ": " + y[ii] + ", " + y[jj]);
+    	                        if(!CubicSpline.supress)System.out.print("CubicSpline: Two identical points on the absicca (x-axis) with different ordinate (y-axis) values, " + x[ii] + ": " + y[ii] + ", " + y[jj]);
     	                        boolean check = false;
     	                        if(ii==0){
     	                            if(x[2]-x[1]<=sepn)sepn = (x[2]-x[1])/2.0D;
@@ -243,7 +265,7 @@ public class CubicSpline{
     	                                }
     	                            }
     	                        }
-    	                        if(jj==nP-1){
+    	                        if(jj==this.nPoints-1){
     	                            if(x[nP-2]-x[nP-3]<=sepn)sepn = (x[nP-2]-x[nP-3])/2.0D;
     	                            if(this.y[ii]<=this.y[jj]){
     	                                if(this.y[ii-1]<=this.y[ii]){
@@ -262,7 +284,7 @@ public class CubicSpline{
     	                                }
     	                            }
     	                        }
-    	                        if(ii!=0 && jj!=nP-1){
+    	                        if(ii!=0 && jj!=this.nPoints-1){
     	                            if(x[ii]-x[ii-1]<=sepn)sepn = (x[ii]-x[ii-1])/2;
     	                            if(x[jj+1]-x[jj]<=sepn)sepn = (x[jj+1]-x[jj])/2;
                                     if(this.y[ii]>this.y[ii-1]){
@@ -310,21 +332,20 @@ public class CubicSpline{
     	                        if(check==false){
     	                            check = stay(ii, jj, sepn);
     	                        }
-    	                        System.out.println(", the two abscissae have been separated by a distance " + sepn);
+    	                        if(!CubicSpline.supress)System.out.println(", the two abscissae have been separated by a distance " + sepn);
                                 jj++;
      	                    }
     	                }
-    	                if((nP-1)==ii)test2 = false;
+    	                if((this.nPoints-1)==ii)test2 = false;
     	            }
     	            else{
     	                jj++;
     	            }
-    	            if(jj>=nP)test2 = false;
+    	            if(jj>=this.nPoints)test2 = false;
     	        }
     	        ii++;
-    	        if(ii>=nP-1)test1 = false;
+    	        if(ii>=this.nPoints-1)test1 = false;
     	    }
-    	    this.nPoints = nP;
     	    if(this.nPoints<3)throw new IllegalArgumentException("Removal of duplicate points has reduced the number of points to less than the required minimum of three data points");
 
     	    this.checkPoints = true;
@@ -348,6 +369,16 @@ public class CubicSpline{
     	    this.x[ii] -= sepn;
     	    this.x[jj] += sepn;
     	    return true;
+    	}
+
+    	// Supress warning messages in the identifiaction of duplicate points
+    	public static void supress(){
+    	    CubicSpline.supress = true;
+    	}
+
+    	// Unsupress warning messages in the identifiaction of duplicate points
+    	public static void unsupress(){
+    	    CubicSpline.supress = false;
     	}
 
     	// Returns a new CubicSpline setting array lengths to n and all array values to zero with natural spline default
@@ -375,6 +406,7 @@ public class CubicSpline{
     	public void setDerivLimits(double yp1, double ypn){
         	this.yp1=yp1;
         	this.ypn=ypn;
+        	this.calcDeriv();
     	}
 
     	// Resets a natural spline
@@ -382,6 +414,7 @@ public class CubicSpline{
     	public void setDerivLimits(){
         	this.yp1=Double.NaN;
         	this.ypn=Double.NaN;
+        	this.calcDeriv();
     	}
 
     	// Enters the first derivatives of the cubic spline at
@@ -391,7 +424,7 @@ public class CubicSpline{
     	public void setDeriv(double yp1, double ypn){
         	this.yp1=yp1;
         	this.ypn=ypn;
-        	this.derivCalculated = false;
+        	this.calcDeriv();
     	}
 
     	// Returns the internal array of second derivatives
@@ -452,7 +485,6 @@ public class CubicSpline{
     	//  then stored for use on all subsequent calls
     	public double interpolate(double xx){
 
-    	    if(!this.checkPoints)this.checkForIdenticalPoints();
     	    // Check for violation of interpolation bounds
         	if (xx<this.x[0]){
         	    // if violation is less than potntial rounding error - amend to lie with bounds

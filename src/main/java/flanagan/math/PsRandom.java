@@ -22,7 +22,7 @@
 *   AUTHOR: Dr Michael Thomas Flanagan
 *   DATE:   22 April 2004
 *   UPDATE: 21 November 2006, 31 December 2006, 14 April 2007, 19 October 2007, 16-29 March 2008,
-*           3 July 2008, 19 September 2008, 28 September 2008, 13 and 18 October 2009
+*           3 July 2008, 19 September 2008, 28 September 2008, 13 and 18 October 2009, 12-24 July 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
@@ -51,12 +51,11 @@
 
 package flanagan.math;
 
+import java.util.*;
 import java.io.Serializable;
-import java.util.Random;
 
 import flanagan.analysis.Stat;
-import flanagan.roots.RealRoot;
-import flanagan.roots.RealRootFunction;
+import flanagan.roots.*;
 
 public class PsRandom implements Serializable{
 
@@ -82,6 +81,11 @@ public class PsRandom implements Serializable{
                                  // = 2 Method -    Park and Miller random number generator with Bays-Durham shuffle
                                  //                 after 	ran1 	(Numerical Recipes in C - W.H. Press et al. (Cambridge)
     		                     //                 2nd edition 1992 p280.
+
+    private int methodOptionInteger = 1;    // Method for calculating pseudorandom integer numbers
+                                 // = 1 Method -    java Random nextInt(int(n)
+                                 // = 2 Method -    next double scaled with rounding
+                                 // = 3 Method -    next doubled scaled with flooring
 
     private Random rr = null;    // instance of java.util.Random if Knuth method (default method) used
 
@@ -140,9 +144,7 @@ public class PsRandom implements Serializable{
     // Resets the value of the seed
     public void setSeed(long seed){
         this.seed = seed;
-        if(this.methodOptionDecimal==1) {
-          rr = new Random(this.seed);
-        }
+        if(this.methodOptionDecimal==1)rr = new Random(this.seed);
     }
 
     // Returns the initial value of the seed
@@ -161,15 +163,27 @@ public class PsRandom implements Serializable{
     public void setMethodDecimal(int methodOpt){
         if(methodOpt<1 || methodOpt>2)throw new IllegalArgumentException("Argument to PsRandom.setMethodDecimal must 1 or 2\nValue transferred was"+methodOpt);
         this.methodOptionDecimal = methodOpt;
-        if(methodOpt==1) {
-          rr = new Random(this.seed);
-        }
+        if(methodOpt==1)rr = new Random(this.seed);
     }
 
-    // Return the binary pseudorandom number method option; 1 = Method 1, 2= Method 2
+    // Return the pseudorandom decimal number method option; 1 = Method 1 (Knuth), 2= Method 2 (Parker-Miller)
     public int getMethodDecimal(){
         return this.methodOptionDecimal;
     }
+
+    // Resets the method of calculation of a pseudorandom integer number
+    // argument = 1 -> Diego Moreira alternative 1; argument = 2 -> Diego Moreira alternative 2; 3 ->  Java Random class method nextInt
+    // Default option = 1
+    public void setMethodInteger(int methodOpt){
+        if(methodOpt<1 || methodOpt>3)throw new IllegalArgumentException("Argument to PsRandom.setMethodInteger must 1, 2 or 3\nValue transferred was"+methodOpt);
+        this.methodOptionInteger = methodOpt;
+    }
+
+    // Return the pseudorandom integer number method option; 1 = Method 1 (Diego Moreira alternative 1), 2= Method 2 (Diego Moreira alternative 2), 2 = ; 3 ->  Java Random class method nextInt
+    public int getMethodInteger(){
+        return this.methodOptionInteger;
+    }
+
     // Resets the method of calculation of a pseudorandom binary number
     // argument = 1 -> method 1; argument = 2 -> Method 2
     // See above and Numerical Recipes reference (in program header) for method descriptions
@@ -177,9 +191,7 @@ public class PsRandom implements Serializable{
     public void setMethodBinary(int methodOpt){
         if(methodOpt<1 || methodOpt>2)throw new IllegalArgumentException("Argument to PsRandom.setMethodBinary must 1 or 2\nValue transferred was"+methodOpt);
         this.methodOptionBinary = methodOpt;
-        if(methodOpt==1) {
-          rr = new Random(this.seed);
-        }
+        if(methodOpt==1)rr = new Random(this.seed);
     }
 
     // Return the binary pseudorandom number method option; 1 = Method 1, 2= Method 2
@@ -189,10 +201,12 @@ public class PsRandom implements Serializable{
 
     // Returns a pseudorandom double between 0.0 and 1.0
     public double nextDouble(){
-        if(this.methodOptionDecimal==1)
-          return this.rr.nextDouble();
-        else
-          return this.parkMiller();
+        if(this.methodOptionDecimal==1){
+            return this.rr.nextDouble();
+        }
+        else{
+            return this.parkMiller();
+        }
     }
 
     // Returns a pseudorandom double between 0.0 and top
@@ -227,7 +241,7 @@ public class PsRandom implements Serializable{
     public double[] doubleArray(int arrayLength, double bottom, double top){
         double[] array = new double[arrayLength];
         for(int i=0; i<arrayLength; i++){
-            array[i] = top*this.nextDouble();
+            array[i] = (top - bottom)*this.nextDouble() + bottom;
         }
          return array;
     }
@@ -253,35 +267,33 @@ public class PsRandom implements Serializable{
 		    for(int j=ntab+7; j>=0; j--){
 			    kk = this.seed/iq;
 			    this.seed = ia*( this.seed - kk*iq)- ir*kk;
-			    if(this.seed < 0L) {
-            this.seed += im;
-          }
-			    if (j < ntab) {
-            iv[j] = this.seed;
-          }
+			    if(this.seed < 0L) this.seed += im;
+			    if (j < ntab) iv[j] = this.seed;
 		    }
 		    iy = iv[0];
 	    }
 	    kk = this.seed/iq;
 	    this.seed = ia*(this.seed - kk*iq)-ir*kk;
-	    if(this.seed < 0) {
-        this.seed += im;
-      }
+	    if(this.seed < 0)this.seed += im;
 	    jj = (int)(iy/ndiv);
 	    iy = iv[jj];
 	    iv[jj] = this.seed;
-	    if((temp = am*iy) > rnmx)
-        return rnmx;
-      else
-        return temp;
+	    if((temp = am*iy) > rnmx){
+	        return rnmx;
+	    }
+	    else{
+	        return temp;
+	    }
 	}
 
     // Returns a pseudorandom bit
     public int nextBit(){
-        if(this.methodOptionBinary==1)
-          return nextBitM1();
-        else
-          return  nextBitM2();
+        if(this.methodOptionBinary==1){
+            return nextBitM1();
+        }
+        else{
+            return  nextBitM2();
+        }
     }
 
     // Returns an array, of length arrayLength, of pseudorandom bits
@@ -578,9 +590,9 @@ public class PsRandom implements Serializable{
             LogNormalThreeParFunct logNorm3 = new LogNormalThreeParFunct();
 
             // set function variables
-            logNorm3.data.alpha = alpha;
-            logNorm3.data.beta = beta;
-            logNorm3.data.gamma = gamma;
+            logNorm3.alpha = alpha;
+            logNorm3.beta = beta;
+            logNorm3.gamma = gamma;
 
             // required tolerance
             double tolerance = 1e-10;
@@ -611,7 +623,7 @@ public class PsRandom implements Serializable{
             while(test){
 
                 //  set function cfd  variable
-                logNorm3.data.cfd = this.nextDouble();
+                logNorm3.cfd = this.nextDouble();
 
                 // call root searching method
                 ran = realR.falsePosition(logNorm3, lowerBound, upperBound);
@@ -644,9 +656,9 @@ public class PsRandom implements Serializable{
             LogNormalThreeParFunct logNorm3 = new LogNormalThreeParFunct();
 
             // set function variables
-            logNorm3.data.alpha = alpha;
-            logNorm3.data.beta = beta;
-            logNorm3.data.gamma = gamma;
+            logNorm3.alpha = alpha;
+            logNorm3.beta = beta;
+            logNorm3.gamma = gamma;
 
             // required tolerance
             double tolerance = 1e-10;
@@ -681,7 +693,7 @@ public class PsRandom implements Serializable{
                 while(test){
 
                     //  set function cfd  variable
-                    logNorm3.data.cfd = this.nextDouble();
+                    logNorm3.cfd = this.nextDouble();
 
                     // call root searching method, bisectNewtonRaphson
                     double rangd = realR.falsePosition(logNorm3, lowerBound, upperBound);
@@ -853,9 +865,7 @@ public class PsRandom implements Serializable{
 	    if(nTrials < 25) {
 	        // if number of trials greater than 25 use direct method
 		    binomialDeviate=0.0D;
-		    for (jj=1;jj<=nTrials;jj++)if (this.nextDouble() < workingProb) {
-          ++binomialDeviate;
-        }
+		    for (jj=1;jj<=nTrials;jj++)if (this.nextDouble() < workingProb) ++binomialDeviate;
 	    }
 	    else if(deviateMean < 1.0D) {
 	        // if fewer than 1 out of 25 events - Poisson approximation is accurate
@@ -863,9 +873,7 @@ public class PsRandom implements Serializable{
 		    testDeviate=1.0D;
 		    for(jj=0;jj<=nTrials;jj++) {
 			    testDeviate *= this.nextDouble();
-			    if (testDeviate < expOfMean) {
-            break;
-          }
+			    if (testDeviate < expOfMean) break;
 		    }
 		    binomialDeviate=(jj <= nTrials ? jj : nTrials);
 
@@ -874,7 +882,7 @@ public class PsRandom implements Serializable{
 	        // use rejection method
 		    if(nTrials != nOld) {
 		        // if nTrials has changed compute useful quantities
-			    enTrials = nTrials;
+			    enTrials = (double)nTrials;
 			    oldGamma = Stat.logGamma(enTrials + 1.0D);
 			    nOld = nTrials;
 		    }
@@ -892,16 +900,14 @@ public class PsRandom implements Serializable{
 				    double angle = Math.PI*this.nextDouble();
 				    tanW = Math.tan(angle);
 				    hold0 = sq*tanW + deviateMean;
-			    }while(hold0 < 0.0D || hold0 >= (enTrials + 1.0D));   //rejection test
-			    hold0 = Math.floor(hold0);                              // integer value distribution
+			    }while(hold0 < 0.0D || hold0 >= (enTrials + 1.0D));                 // rejection test
+			    hold0 = Math.floor(hold0);                                          // integer value distribution
 			    testDeviate = 1.2D*sq*(1.0D + tanW*tanW)*Math.exp(oldGamma - Stat.logGamma(hold0 + 1.0D) - Stat.logGamma(enTrials - hold0 + 1.0D) + hold0*logProb + (enTrials - hold0)*logProbC);
-		    }while(this.nextDouble() > testDeviate);                         // rejection test
+		    }while(this.nextDouble() > testDeviate);                                // rejection test
 		    binomialDeviate=hold0;
 	    }
 
-	    if(workingProb != prob) {
-        binomialDeviate = nTrials - binomialDeviate;       // symmetry transformation
-      }
+	    if(workingProb != prob) binomialDeviate = nTrials - binomialDeviate;        // symmetry transformation
 
 	    return binomialDeviate;
     }
@@ -941,9 +947,7 @@ public class PsRandom implements Serializable{
 	        if(nTrials < 25) {
 	            // if number of trials greater than 25 use direct method
 		        binomialDeviate=0.0D;
-		        for(jj=1;jj<=nTrials;jj++)if (this.nextDouble() < workingProb) {
-              ++binomialDeviate;
-            }
+		        for(jj=1;jj<=nTrials;jj++)if (this.nextDouble() < workingProb) ++binomialDeviate;
 	        }
 	        else if(deviateMean < 1.0D) {
 	            // if fewer than 1 out of 25 events - Poisson approximation is accurate
@@ -951,9 +955,7 @@ public class PsRandom implements Serializable{
 		        testDeviate=1.0D;
 		        for (jj=0;jj<=nTrials;jj++) {
 			        testDeviate *= this.nextDouble();
-			        if (testDeviate < expOfMean) {
-                break;
-              }
+			        if (testDeviate < expOfMean) break;
 		        }
 		        binomialDeviate=(jj <= nTrials ? jj : nTrials);
 
@@ -962,7 +964,7 @@ public class PsRandom implements Serializable{
 	            // use rejection method
 		        if(nTrials != nOld) {
 		            // if nTrials has changed compute useful quantities
-			        enTrials = nTrials;
+			        enTrials = (double)nTrials;
 			        oldGamma = Stat.logGamma(enTrials + 1.0D);
 			        nOld = nTrials;
 		        }
@@ -980,16 +982,14 @@ public class PsRandom implements Serializable{
 				        double angle = Math.PI*this.nextDouble();
 				        tanW = Math.tan(angle);
 				        hold0 = sq*tanW + deviateMean;
-			        }while(hold0 < 0.0D || hold0 >= (enTrials + 1.0D));   //rejection test
-			        hold0 = Math.floor(hold0);                              // integer value distribution
+			        }while(hold0 < 0.0D || hold0 >= (enTrials + 1.0D));                 // rejection test
+			        hold0 = Math.floor(hold0);                                          // integer value distribution
 			        testDeviate = 1.2D*sq*(1.0D + tanW*tanW)*Math.exp(oldGamma - Stat.logGamma(hold0 + 1.0D) - Stat.logGamma(enTrials - hold0 + 1.0D) + hold0*logProb + (enTrials - hold0)*logProbC);
-		        }while(this.nextDouble() > testDeviate);                         // rejection test
+		        }while(this.nextDouble() > testDeviate);                                // rejection test
 		        binomialDeviate=hold0;
 	        }
 
-	        if(workingProb != prob) {
-            binomialDeviate = nTrials - binomialDeviate;       // symmetry transformation
-          }
+	        if(workingProb != prob) binomialDeviate = nTrials - binomialDeviate;       // symmetry transformation
 
 	        ran[i] = binomialDeviate;
 	    }
@@ -1114,9 +1114,7 @@ public class PsRandom implements Serializable{
     // mu = location parameter, scale = scale parameter, n is the length of the returned array
     public double[] logisticArray(double mu, double scale, int n){
         double[] ran = new double[n];
-        for(int i=0; i<n; i++) {
-          ran[i] = 2.0D*scale*Fmath.atanh(2.0D*this.nextDouble() - 1.0D) + mu;
-        }
+        for(int i=0; i<n; i++) ran[i] = 2.0D*scale*Fmath.atanh(2.0D*this.nextDouble() - 1.0D) + mu;
         return ran;
     }
 
@@ -1136,9 +1134,7 @@ public class PsRandom implements Serializable{
         // Set initial range for search
         double centre = 0.0D;
         double range = 100.0D;
-        if(nu>2) {
-          range = nu/(nu-2);
-        }
+        if(nu>2)range = nu/(nu-2);
 
         // lower bound
         double lowerBound = centre - 5.0D*range;
@@ -1207,9 +1203,7 @@ public class PsRandom implements Serializable{
         // Set initial range for search
         double centre = 0.0D;
         double range = 100.0D;
-        if(nu>2) {
-          range = nu/(nu-2);
-        }
+        if(nu>2)range = nu/(nu-2);
 
         // required tolerance
         double tolerance = 1e-10;
@@ -1446,9 +1440,7 @@ public class PsRandom implements Serializable{
 
         // upper bound
         double upperBound = mu + 5.0D*range;
-        if(upperBound<=lowerBound) {
-          upperBound += range;
-        }
+        if(upperBound<=lowerBound)upperBound += range;
 
         // Create instance of RealRoot
         RealRoot realR = new RealRoot();
@@ -1521,9 +1513,7 @@ public class PsRandom implements Serializable{
 
         // upper bound
         double upperBound = mu + 5.0D*range;
-        if(upperBound<=lowerBound) {
-          upperBound += range;
-        }
+        if(upperBound<=lowerBound)upperBound += range;
 
         for(int i=0; i<n; i++){
 
@@ -1578,13 +1568,13 @@ public class PsRandom implements Serializable{
 
     // method for generating an Erlang random deviate
     public double nextErlang(double lambda, int kay){
-        return nextGamma(0.0D, 1.0D/lambda, kay);
+        return nextGamma(0.0D, 1.0D/lambda, (double) kay);
     }
 
 
     // method for generating an array of Erlang random deviates
     public double[] erlangArray(double lambda, int kay, int n){
-        return gammaArray(0.0D, 1.0D/lambda, kay, n);
+        return gammaArray(0.0D, 1.0D/lambda, (double) kay, n);
     }
 
     // CHI-SQUARE
@@ -1742,9 +1732,7 @@ public class PsRandom implements Serializable{
 
             // upper bound
             double upperBound = 10.0D;
-            if(nu2>4) {
-              upperBound = 5.0D*Math.sqrt(2*nu2*nu2*(nu1+nu2-2)/(nu1*(nu2-2)*(nu2-2)*(nu2-4)));
-            }
+            if(nu2>4)upperBound = 5.0D*Math.sqrt(2*nu2*nu2*(nu1+nu2-2)/(nu1*(nu2-2)*(nu2-2)*(nu2-4)));
 
 
             // Create instance of RealRoot
@@ -1812,11 +1800,9 @@ public class PsRandom implements Serializable{
 
         // upper bound
         double upperBound = 10.0D;
-        double nu1d = nu1;
-        double nu2d = nu2;
-        if(nu2>4) {
-          upperBound = 5.0D*Math.sqrt(2*nu2d*nu2d*(nu1d+nu2d-2)/(nu1d*(nu2d-2)*(nu2d-2)*(nu2d-4)));
-        }
+        double nu1d = (double) nu1;
+        double nu2d = (double) nu2;
+        if(nu2>4)upperBound = 5.0D*Math.sqrt(2*nu2d*nu2d*(nu1d+nu2d-2)/(nu1d*(nu2d-2)*(nu2d-2)*(nu2d-4)));
 
         for(int i=0; i<n; i++){
 
@@ -1867,21 +1853,29 @@ public class PsRandom implements Serializable{
     }
 
     // PSEUDORANDOM INTEGERS
-    // Returns a pseudorandom integer between 0.0 and top
-    public int nextInteger(int top){
-        double pr0 = this.nextDouble();
-        int pr1 = (int)Math.round(pr0*top);
-        return pr1;
-    }
-
-    // Returns a pseudorandom integer between bottom and top
+    // Returns a pseudorandom int integer between 0.0 and top
     public int nextInteger(int bottom, int top){
-        double pr0 = this.nextDouble();
-        int pr1 = (int)Math.round(pr0*(top - bottom));
-        return pr1 + bottom;
+        int randint = 0;
+        switch(this.methodOptionInteger){
+             case 1: // Java Random class nextInt()
+                    randint = this.rr.nextInt(++top - bottom) + bottom;
+                    break;
+            case 2: randint = (int)Math.round(this.nextDouble()*(top - bottom)) + bottom;
+                    break;
+            case 3: randint = (int)Math.floor(this.nextDouble()*(++top - bottom)) + bottom;
+                    break;
+            default: throw new IllegalArgumentException("methodOptionInteger, " + this.methodOptionInteger + " is not recognised");
+        }
+
+        return randint;
     }
 
-    // Returns an array, of length arraylength, of pseudorandom integers between 0.0 and top
+    // Returns a pseudorandom int integer between bottom (inclusive) and top (inclusive)
+    public int nextInteger(int top){
+        return this.nextInteger(0, top);
+    }
+
+    // Returns an array, of length arraylength, of pseudorandom int integers between 0.0 (inclusive) and top (inclusive)
     public int[] integerArray(int arrayLength, int top){
         int[] array = new int[arrayLength];
         for(int i=0; i<arrayLength; i++){
@@ -1890,7 +1884,7 @@ public class PsRandom implements Serializable{
         return array;
     }
 
-    // Returns an array, of length arraylength, of pseudorandom integers between bottom and top
+    // Returns an array, of length arraylength, of pseudorandom int integers between bottom and top
     public int[] integerArray(int arrayLength, int bottom, int top){
         int[] array = new int[arrayLength];
         for(int i=0; i<arrayLength; i++){
@@ -1904,9 +1898,7 @@ public class PsRandom implements Serializable{
     public int[] uniqueIntegerArray(int bottom, int top){
         int range = top - bottom;
         int[] array = uniqueIntegerArray(range);
-        for(int i=0; i<range+1; i++) {
-          array[i] += bottom;
-        }
+        for(int i=0; i<range+1; i++)array[i] += bottom;
         return array;
     }
 
@@ -1919,24 +1911,21 @@ public class PsRandom implements Serializable{
         boolean allFound = false;                           // will equal true when all required integers found
         int nFound = 0;                                     // number of required pseudorandom integers found
         boolean[] found = new boolean[numberOfIntegers];    // = true when integer corresponding to its index is found
-        for(int i=0; i<numberOfIntegers; i++) {
-          found[i] = false;
-        }
+        for(int i=0; i<numberOfIntegers; i++)found[i] = false;
 
-        boolean test0 = true;
-        while(test0){
+        while(!allFound){
             int ii = this.nextInteger(top);
             if(!found[ii]){
                 array[nFound] = ii;
                 found[ii] = true;
                 nFound++;
-                if(nFound==numberOfIntegers) {
-                  test0 = false;
-                }
+                if(nFound==numberOfIntegers)allFound = true;
             }
         }
         return array;
     }
+
+
 
     // Return the serial version unique identifier
     public static long getSerialVersionUID(){
@@ -2034,3 +2023,18 @@ class LogNormalTwoParFunct implements RealRootFunction{
         }
 }
 
+// Class to evaluate the three parameter log-normal distribution function
+class LogNormalThreeParFunct implements RealRootFunction{
+
+        public double cfd = 0.0D;
+        public double alpha = 0.0D;
+        public double beta = 0.0D;
+        public double gamma = 0.0D;
+
+        public double function(double x){
+
+            double y = cfd - Stat.logNormalThreeParCDF(alpha, beta, gamma, x);
+
+            return y;
+        }
+}

@@ -12,14 +12,14 @@
 *
 *       Created: March 2003
 *       Updated: 23 April 2003, 3 May 2005, 3 April 2006, 2 July 2006, 6 April 2008, 2-7 November 2009, 23 May 2010
-*                24 May 2010
+*                24 May 2010, 18 January 2011
 *
 *       DOCUMENTATION:
 *       See Michael T Flanagan's JAVA library on-line web page:
 *       http://www.ee.ucl.ac.uk/~mflanaga/java/SecondOrder.html
 *       http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-* Copyright (c) 2003 - 2010  Michael Thomas Flanagan
+* Copyright (c) 2003 - 2011  Michael Thomas Flanagan
 *
 * PERMISSION TO COPY:
 *
@@ -228,14 +228,6 @@ public class SecondOrder extends BlackBox{
 
     public double getAttenuation(){
         return this.sigma;
-    }
-
-    // Calculate the zeros and poles in the s-domain
-    protected void calcPolesZerosS(){
-        super.sPoles = super.sDenom.roots();
-        if(super.sDenomSet)super.sDenomScaleFactor = BlackBox.scaleFactor( super.sDenom,  super.sPoles);
-        if(super.sNumerSet)super.sNumerScaleFactor = super.sNumer.coeffCopy(0);
-
     }
 
     //  Get the s-domain output for a given s-value and a given input.

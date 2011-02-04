@@ -13,13 +13,14 @@
 *   AMENDED: 6 January 2006, 12 April 2006, 5 May 2006, 28 July 2006, 27 December 2006,
 *            29 March 2007, 29 April 2007, 2,9,15 & 26 June 2007, 20 October 2007, 4-6 December 2007
 *            27 February 2008, 25 April 2008, 26 April 2008, 13 May 2008, 25/26 May 2008, 3-7 July 2008
+*            11 November 2010, 9-18 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/Fmath.html
 *
-*   Copyright (c) 2002 - 2008
+*   Copyright (c) 2002 - 2011
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for
@@ -34,6 +35,7 @@
 ***************************************************************************************/
 
 package flanagan.math;
+
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -678,6 +680,30 @@ public class Fmath{
             return 0.5D*sgn*(Math.log(1.0/a + Math.sqrt(1.0D/(a*a) + 1.0D)));
         }
 
+    // DETERMINING PRECISION i.e. number of mantissa places
+    public static int checkPrecision(double number){
+        boolean test = true;
+        int prec = 0;
+        if(Fmath.isNaN(number))test=false;
+        if(Fmath.isPlusInfinity(number))test=false;
+        if(Fmath.isMinusInfinity(number))test=false;
+        while(test){
+            if(number==Fmath.truncate(number, prec)){
+                test = false;
+            }
+            else{
+                prec++;
+                if(prec>20)test=false;
+            }
+        }
+        return prec;
+    }
+
+    public static int checkPrecision(float number){
+        return checkPrecision((double)number);
+    }
+
+
     // MANTISSA ROUNDING (TRUNCATING)
     // returns a value of xDouble truncated to trunc decimal places
     public static double truncate(double xDouble, int trunc){
@@ -1148,6 +1174,87 @@ public class Fmath{
             Short X = new Short(x);
             Short Y = new Short(y);
             return X.compareTo(Y);
+        }
+
+        // COMPARE ARRAYS
+        // Returns true if arrays identical, false if not
+        // arrays - double[]
+        public static boolean compare(double[] array1, double[] array2){
+            boolean ret = true;
+            int n = array1.length;
+            int m = array2.length;
+            if(n!=m){
+                ret = false;
+            }
+            else{
+                for(int i=0; i<n; i++){
+                    if(array1[i]!=array2[i]){
+                        ret = false;
+                        break;
+                    }
+                }
+            }
+            return ret;
+        }
+
+        // Returns true if arrays identical, false if not
+        // arrays - float[]
+        public static boolean compare(float[] array1, float[] array2){
+            boolean ret = true;
+            int n = array1.length;
+            int m = array2.length;
+            if(n!=m){
+                ret = false;
+            }
+            else{
+                for(int i=0; i<n; i++){
+                    if(array1[i]!=array2[i]){
+                        ret = false;
+                        break;
+                    }
+                }
+            }
+            return ret;
+        }
+
+        // Returns true if arrays identical, false if not
+        // arrays - int[]
+        public static boolean compare(int[] array1, int[] array2){
+            boolean ret = true;
+            int n = array1.length;
+            int m = array2.length;
+            if(n!=m){
+                ret = false;
+            }
+            else{
+                for(int i=0; i<n; i++){
+                    if(array1[i]!=array2[i]){
+                        ret = false;
+                        break;
+                    }
+                }
+            }
+            return ret;
+        }
+
+        // Returns true if arrays identical, false if not
+        // arrays - long[]
+        public static boolean compare(long[] array1, long[] array2){
+            boolean ret = true;
+            int n = array1.length;
+            int m = array2.length;
+            if(n!=m){
+                ret = false;
+            }
+            else{
+                for(int i=0; i<n; i++){
+                    if(array1[i]!=array2[i]){
+                        ret = false;
+                        break;
+                    }
+                }
+            }
+            return ret;
         }
 
         // IS AN INTEGER
@@ -3643,12 +3750,493 @@ public class Fmath{
             }
         }
 
+        // COPY A ONE DIMENSIONAL ARRAY OF double
+        public static double[] copy(double[] array){
+            if(array==null)return null;
+            int n = array.length;
+            double[] copy = new double[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A ONE DIMENSIONAL ARRAY OF float
+        public static float[] copy(float[] array){
+            if(array==null)return null;
+            int n = array.length;
+            float[] copy = new float[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A ONE DIMENSIONAL ARRAY OF int
+        public static int[] copy(int[] array){
+            if(array==null)return null;
+            int n = array.length;
+            int[] copy = new int[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A ONE DIMENSIONAL ARRAY OF long
+        public static long[] copy(long[] array){
+            if(array==null)return null;
+            int n = array.length;
+            long[] copy = new long[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF double
+        public static double[][] copy(double[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            double[][] copy = new double[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new double[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF float
+        public static float[][] copy(float[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            float[][] copy = new float[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new float[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF int
+        public static int[][] copy(int[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            int[][] copy = new int[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new int[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF long
+        public static long[][] copy(long[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            long[][] copy = new long[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new long[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A THREE DIMENSIONAL ARRAY OF double
+        public static double[][][] copy(double[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            double[][][] copy = new double[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new double[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new double[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+
+        // COPY A THREE DIMENSIONAL ARRAY OF float
+        public static float[][][] copy(float[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            float[][][] copy = new float[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new float[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new float[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A THREE DIMENSIONAL ARRAY OF int
+        public static int[][][] copy(int[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            int[][][] copy = new int[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new int[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new int[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A THREE DIMENSIONAL ARRAY OF long
+        public static long[][][] copy(long[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            long[][][] copy = new long[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new long[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new long[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF double
+        public static double[][][][] copy(double[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            double[][][][] copy = new double[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new double[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new double[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new double[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF float
+        public static float[][][][] copy(float[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            float[][][][] copy = new float[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new float[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new float[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new float[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF int
+        public static int[][][][] copy(int[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            int[][][][] copy = new int[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new int[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new int[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new int[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF long
+        public static long[][][][] copy(long[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            long[][][][] copy = new long[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new long[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new long[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new long[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+                // COPY A ONE DIMENSIONAL ARRAY OF String
+        public static String[] copy(String[] array){
+            if(array==null)return null;
+            int n = array.length;
+            String[] copy = new String[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF String
+        public static String[][] copy(String[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            String[][] copy = new String[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new String[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A THREE DIMENSIONAL ARRAY OF String
+        public static String[][][] copy(String[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            String[][][] copy = new String[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new String[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new String[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF String
+        public static String[][][][] copy(String[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            String[][][][] copy = new String[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new String[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new String[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new String[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+
+
+
+        // COPY A ONE DIMENSIONAL ARRAY OF boolean
+        public static boolean[] copy(boolean[] array){
+            if(array==null)return null;
+            int n = array.length;
+            boolean[] copy = new boolean[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF boolean
+        public static boolean[][] copy(boolean[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            boolean[][] copy = new boolean[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new boolean[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A THREE DIMENSIONAL ARRAY OF boolean
+        public static boolean[][][] copy(boolean[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            boolean[][][] copy = new boolean[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new boolean[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new boolean[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF boolean
+        public static boolean[][][][] copy(boolean[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            boolean[][][][] copy = new boolean[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new boolean[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new boolean[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new boolean[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+
+
+        // COPY A ONE DIMENSIONAL ARRAY OF char
+        public static char[] copy(char[] array){
+            if(array==null)return null;
+            int n = array.length;
+            char[] copy = new char[n];
+            for(int i=0; i<n; i++){
+                copy[i] = array[i];
+            }
+            return copy;
+        }
+
+        // COPY A TWO DIMENSIONAL ARRAY OF char
+        public static char[][] copy(char[][] array){
+            if(array==null)return null;
+            int n = array.length;
+            char[][] copy = new char[n][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new char[m];
+                for(int j=0; j<m; j++){
+                    copy[i][j] = array[i][j];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A THREE DIMENSIONAL ARRAY OF char
+        public static char[][][] copy(char[][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            char[][][] copy = new char[n][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new char[m][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new char[l];
+                    for(int k=0; k<l;k++)copy[i][j][k] = array[i][j][k];
+                }
+            }
+            return copy;
+        }
+
+        // COPY A FOUR DIMENSIONAL ARRAY OF char
+        public static char[][][][] copy(char[][][][] array){
+            if(array==null)return null;
+            int n = array.length;
+            char[][][][] copy = new char[n][][][];
+            for(int i=0; i<n; i++){
+                int m = array[i].length;
+                copy[i] = new char[m][][];
+                for(int j=0; j<m; j++){
+                    int l = array[i][j].length;
+                    copy[i][j] = new char[l][];
+                    for(int k=0; k<l;k++){
+                        int ll = array[i][j][k].length;
+                        copy[i][j][k] = new char[ll];
+                        for(int kk=0; kk<ll;kk++){
+                            copy[i][j][k][kk] = array[i][j][k][kk];
+                        }
+                    }
+                }
+            }
+            return copy;
+        }
+
+
+
         // COPY OF AN OBJECT (deprecated - see Conv class)
         // Returns a copy of the object
         // An exception will be thrown if an attempt to copy a non-serialisable object is made.
         // Taken, with minor changes,  from { Java Techniques }
         // http://javatechniques.com/blog/
-        public static Object copyObject(Object obj) {
+        public static Object copy(Object obj){
+            if(obj==null)return null;
+            return Fmath.copyObject(obj);
+        }
+
+        // COPY OF AN OBJECT (deprecated - see Conv class)
+        // Returns a copy of the object
+        // An exception will be thrown if an attempt to copy a non-serialisable object is made.
+        // Taken, with minor changes,  from { Java Techniques }
+        // http://javatechniques.com/blog/
+        public static Object copyObject(Object obj){
+            if(obj==null)return null;
             Object objCopy = null;
             try {
                 // Write the object out to a byte array

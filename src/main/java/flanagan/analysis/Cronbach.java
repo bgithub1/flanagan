@@ -12,7 +12,7 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       July and Agust 2008
-*   AMENDED:    22 August 2008, 29 August 2008, 1-8 October 2008
+*   AMENDED:    22 August 2008, 29 August 2008, 1-8 October 2008, 1-4 November 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
@@ -45,10 +45,14 @@ package flanagan.analysis;
 import java.util.*;
 import java.text.*;
 
-import flanagan.math.*;
-import flanagan.io.*;
-import flanagan.analysis.*;
-import flanagan.plot.*;
+import flanagan.math.Fmath;
+import flanagan.math.ArrayMaths;
+import flanagan.io.Db;
+import flanagan.io.FileOutput;
+import flanagan.analysis.Scores;
+import flanagan.analysis.Stat;
+import flanagan.plot.PlotGraph;
+import flanagan.plot.Plot;
 
 
 public class Cronbach extends Scores{
@@ -59,7 +63,7 @@ public class Cronbach extends Scores{
     private boolean standardizedAlphaCalculated = false;                // = true when standardized alpha reliability coefficient calculated
 
     private int deletedItemIndex = -1;                                  // the index of the least consistent item
-
+    private String deletedFilename = null;                              // File name of new data file with least consistent item deleted
 
 
     // CONSTRUCTOR
@@ -354,7 +358,8 @@ public class Cronbach extends Scores{
             fout.printtab("Number of 'no responses' replaced ");
             fout.println(this.nReplacements);
             fout.printtab("Item name and person index of replacements: ");
-            for(int i=0; i<this.nReplacements; i++)fout.printtab(this.replacementIndices[i]);
+            for(int i=0; i<this.nReplacements; i++)fout.printtab(this.replacementIndices[i] + " ");
+            fout.println();
             fout.printtab("Replacement option: ");
             fout.println(this.replacementOptionNames[this.replacementOption-1]);
             fout.println();
@@ -421,7 +426,7 @@ public class Cronbach extends Scores{
 
 
         // Item statistics
-        fout.println("ITEMS: MEANS, STANDARD DEVIATIONS, SKENESS AND KURTOSIS");
+        fout.println("ITEMS: MEANS, STANDARD DEVIATIONS, SKEWNESS AND KURTOSIS");
         fout.println("Raw data");
         fout.printtab("item ");
         fout.printtab("mean");
@@ -565,7 +570,7 @@ public class Cronbach extends Scores{
         fout.println();
 
         fout.println("Standardized data");
-        fout.println("ITEMS: MEANS, STANDARD DEVIATIONS, SKENESS AND KURTOSIS");
+        fout.println("ITEMS: MEANS, STANDARD DEVIATIONS, SKEWNESS AND KURTOSIS");
         fout.printtab("item ");
         fout.printtab("mean");
         fout.printtab("standard");
@@ -849,7 +854,7 @@ public class Cronbach extends Scores{
             fout.printtab(Fmath.truncate(this.rawPersonMaxima[i], this.trunc));
             fout.printtab(Fmath.truncate(this.rawPersonRanges[i], this.trunc));
             fout.printtab(Fmath.truncate(this.rawPersonTotals[i], this.trunc));
-            for(int j=0; j<this.nItems; j++)fout.printtab(this.scores1[i][j]);
+            for(int j=0; j<this.nItems; j++)fout.printtab(Fmath.truncate(this.scores1[i][j], this.trunc));
             fout.println();
         }
         fout.println();
@@ -883,7 +888,7 @@ public class Cronbach extends Scores{
             fout.printtab(Fmath.truncate(this.standardizedPersonMaxima[i], this.trunc));
             fout.printtab(Fmath.truncate(this.standardizedPersonRanges[i], this.trunc));
             fout.printtab(Fmath.truncate(this.standardizedPersonTotals[i], this.trunc));
-            for(int j=0; j<this.nItems; j++)fout.printtab(Fmath.truncate(this.standardizedScores1[i][j], trunc));
+            for(int j=0; j<this.nItems; j++)fout.printtab(Fmath.truncate(this.standardizedScores1[i][j], this.trunc));
             fout.println();
         }
         fout.println();
@@ -1023,7 +1028,8 @@ public class Cronbach extends Scores{
             fout.printtab("Number of 'no responses' replaced ");
             fout.println(this.nReplacements);
             fout.print("Item name and person index of replacements: ", 50);
-            for(int i=0; i<this.nReplacements; i++)fout.print(this.replacementIndices[i], fieldInt);
+            for(int i=0; i<this.nReplacements; i++)fout.print((this.replacementIndices[i]+" "), fieldInt);
+            fout.println();
             fout.print("Replacement option: ", field);
             fout.println(this.replacementOptionNames[this.replacementOption-1]);
             fout.println();
@@ -1044,9 +1050,8 @@ public class Cronbach extends Scores{
         fout.println();
 
         // Correlation coefficients
-        int len = trunc+8;
+        int len = this.trunc+8;
         int fieldItemName = 0;
-        System.out.println("qq " + this.nItems + "  " + this.itemNames[0]);
         for(int i=0; i<=this.nItems; i++)if(this.itemNames[i].length()>fieldItemName)fieldItemName = this.itemNames[i].length();
         int fieldItemNumber = fieldItemName;
         if(len>fieldItemNumber)fieldItemNumber = len;
@@ -1102,7 +1107,7 @@ public class Cronbach extends Scores{
         // item statistics
         if(fieldItemNumber<12)fieldItemNumber = 12;
 
-        fout.println("ITEMS: MEANS, STANDARD DEVIATIONS, SKENESS AND KURTOSIS");
+        fout.println("ITEMS: MEANS, STANDARD DEVIATIONS, SKEWNESS AND KURTOSIS");
         fout.println("Raw data");
         fout.print("item ", fieldItemName);
         fout.print("mean", fieldItemNumber);
@@ -1546,12 +1551,12 @@ public class Cronbach extends Scores{
 
         fout.println("scores:");
         fout.print("person ", fieldInd);
-        for(int i=0; i<this.nItems; i++)fout.print(this.itemNames[i], fieldScore);
+        for(int i=0; i<this.nItems; i++)fout.print(this.itemNames[i], fieldItemNumber);
         fout.println();
 
         for(int i=0; i<this.nPersons; i++){
             fout.print((this.personIndices[i]+1), fieldInd);
-            for(int j=0; j<this.nItems; j++)fout.print(this.scores1[i][j], fieldScore);
+            for(int j=0; j<this.nItems; j++)fout.print(Fmath.truncate(this.scores1[i][j], this.trunc), fieldItemNumber);
             fout.println();
         }
         fout.println();
@@ -1693,19 +1698,19 @@ public class Cronbach extends Scores{
             }
         }
 
-        String deletedFilename = null;
+        this.deletedFilename = null;
         if(this.inputFilename!=null){
-            deletedFilename = this.inputFilename;
-            int pos = deletedFilename.indexOf(".");
-            if(pos!=-1)deletedFilename = deletedFilename.substring(0,pos);
-            deletedFilename = deletedFilename + "_" + this.itemNames[this.deletedItemIndex]+"_deleted";
-            deletedFilename = deletedFilename + ".txt";
+            this.deletedFilename = this.inputFilename;
+            int pos = this.deletedFilename.indexOf(".");
+            if(pos!=-1)this.deletedFilename = this.deletedFilename.substring(0,pos);
+            this.deletedFilename = this.deletedFilename + "_" + this.itemNames[this.deletedItemIndex]+"_deleted";
+            this.deletedFilename = this.deletedFilename + ".txt";
         }
         else{
-            deletedFilename = "DeletedItemFile.txt";
+            this.deletedFilename = "DeletedItemFile.txt";
         }
 
-        FileOutput dfout = new FileOutput(deletedFilename);
+        FileOutput dfout = new FileOutput(this.deletedFilename);
         String newTitle = title[0] + " - Item " + this.itemNames[this.deletedItemIndex] + " deleted";
         dfout.println(newTitle);
         dfout.println((this.nItems-1));
@@ -1735,6 +1740,16 @@ public class Cronbach extends Scores{
             }
         }
         dfout.close();
+    }
+
+    // Return deleted item new data file name
+    public String getDeletionFileName(){
+        return this.deletedFilename;
+    }
+
+    // Return least consistent item name
+    public String getLeastConsistentItemName(){
+        return this.itemNames[this.deletedItemIndex];
     }
 
 

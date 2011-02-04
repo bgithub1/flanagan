@@ -12,14 +12,14 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:	May 2002
-*   UPDATE: 20 May 2003, 17 February 2006, 27 July 2007, 4 December 2007, 21 September 2008, 31 October 2009
+*   UPDATE: 20 May 2003, 17 February 2006, 27 July 2007, 4 December 2007, 21 September 2008, 31 October 2009, 5 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/BiCubicSpline.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2003 - 2009   Michael Thomas Flanagan
+*   Copyright (c) 2003 - 2011   Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *
@@ -47,14 +47,25 @@ public class BiCubicSpline{
 
     	private int nPoints = 0;   	                            // no. of x1 tabulated points
     	private int mPoints = 0;   	                            // no. of x2 tabulated points
+    	private int nPointsT = 0;   	                        // no. of transposed x1 tabulated points
+    	private int mPointsT = 0;   	                        // no. of transposed x2 tabulated points
     	private double[][] y = null;  	                        // y=f(x1,x2) tabulated function
+    	private double[][] yT = null;  	                        // transposed y=f(x1,x2) tabulated function, i.e. y=f(x2,x1)
     	private double[] x1 = null;   	                        // x1 in tabulated function f(x1,x2)
     	private double[] x2 = null;                             // x2 in tabulated function f(x1,x2)
+    	private double xx1 = Double.NaN;                        // value of x1 at which an interpolated y value is required
+    	private double xx2 = Double.NaN;                        // value of x2 at which an interpolated y value is required
     	private double[] xMin = new double[2];                  // minimum values of x1 and x2
     	private double[] xMax = new double[2];                  // maximum values of x1 and x2
     	private double[][] d2ydx2inner = null;                  // second derivatives of first called array of cubic splines
+    	private double[][] d2ydx2innerT = null;                 // second derivatives of first called transposed array of cubic splines
     	private CubicSpline csn[] = null;                       // nPoints array of CubicSpline instances
     	private CubicSpline csm = null;                         // CubicSpline instance
+    	private CubicSpline csnT[] = null;                      // mPoints array of transposed CubicSpline instances
+    	private CubicSpline csmT = null;                        // transposed CubicSpline instance
+    	private double interpolatedValue = Double.NaN;          // interpolated value for the original 2D matrix
+    	private double interpolatedValueTranspose = Double.NaN; // interpolated value for the transposed 2D matrix
+    	private double interpolatedValueMean = Double.NaN;      // mean interpolated value
         private boolean derivCalculated = false;                // = true when the first called cubic spline derivatives have been calculated
         private boolean averageIdenticalAbscissae = false;      // if true: the the ordinate values for identical abscissae are averaged
                                                                 // If false: the abscissae values are separated by 0.001 of the total abscissae range;
@@ -67,16 +78,22 @@ public class BiCubicSpline{
     	public BiCubicSpline(double[] x1, double[] x2, double[][] y){
         	this.nPoints=x1.length;
         	this.mPoints=x2.length;
+        	this.nPointsT=this.mPoints;
+        	this.mPointsT=this.nPoints;
         	if(this.nPoints!=y.length)throw new IllegalArgumentException("Arrays x1 and y-row are of different length " + this.nPoints + " " + y.length);
         	if(this.mPoints!=y[0].length)throw new IllegalArgumentException("Arrays x2 and y-column are of different length "+ this.mPoints + " " + y[0].length);
           	if(this.nPoints<3 || this.mPoints<3)throw new IllegalArgumentException("The data matrix must have a minimum size of 3 X 3");
 
         	this.csm = new CubicSpline(this.nPoints);
         	this.csn = CubicSpline.oneDarray(this.nPoints, this.mPoints);
+        	this.csmT = new CubicSpline(this.mPoints);
+        	this.csnT = CubicSpline.oneDarray(this.nPointsT, this.mPointsT);
         	this.x1 = new double[this.nPoints];
         	this.x2 = new double[this.mPoints];
         	this.y = new double[this.nPoints][this.mPoints];
+        	this.yT = new double[this.nPointsT][this.mPointsT];
         	this.d2ydx2inner = new double[this.nPoints][this.mPoints];
+        	this.d2ydx2innerT = new double[this.nPointsT][this.mPointsT];
         	for(int i=0; i<this.nPoints; i++){
             		this.x1[i]=x1[i];
         	}
@@ -92,14 +109,26 @@ public class BiCubicSpline{
                 		this.y[i][j]=y[i][j];
             		}
         	}
+        	for(int i =0; i<this.nPointsT; i++){
+            		for(int j=0; j<this.mPointsT; j++){
+                		this.yT[i][j]=y[j][i];
+            		}
+        	}
 
         	double[] yTempn = new double[mPoints];
-
 	    	for(int i=0; i<this.nPoints; i++){
 	        	for(int j=0; j<mPoints; j++)yTempn[j]=y[i][j];
 	        	this.csn[i].resetData(x2,yTempn);
 	        	this.csn[i].calcDeriv();
 	        	this.d2ydx2inner[i]=this.csn[i].getDeriv();
+	    	}
+
+	    	double[] yTempnT = new double[mPointsT];
+	    	for(int i=0; i<this.nPointsT; i++){
+	        	for(int j=0; j<mPointsT; j++)yTempnT[j]=yT[i][j];
+	        	this.csnT[i].resetData(x1,yTempnT);
+	        	this.csnT[i].calcDeriv();
+	        	this.d2ydx2innerT[i]=this.csnT[i].getDeriv();
 	    	}
 	    	this.derivCalculated = true;
     	}
@@ -110,15 +139,22 @@ public class BiCubicSpline{
         	this.nPoints=nP;
         	this.mPoints=mP;
           	if(this.nPoints<3 || this.mPoints<3)throw new IllegalArgumentException("The data matrix must have a minimum size of 3 X 3");
-
+            this.nPointsT=mP;
+        	this.mPointsT=nP;
         	this.csm = new CubicSpline(this.nPoints);
+        	this.csmT = new CubicSpline(this.nPointsT);
         	if(!this.roundingCheck)this.csm.noRoundingErrorCheck();
 
         	this.csn = CubicSpline.oneDarray(this.nPoints, this.mPoints);
+        	this.csnT = CubicSpline.oneDarray(this.nPointsT, this.mPointsT);
+
         	this.x1 = new double[this.nPoints];
         	this.x2 = new double[this.mPoints];
         	this.y = new double[this.nPoints][this.mPoints];
+        	this.yT = new double[this.nPointsT][this.mPointsT];
         	this.d2ydx2inner = new double[this.nPoints][this.mPoints];
+        	this.d2ydx2innerT = new double[this.nPointsT][this.mPointsT];
+
     	}
 
     	//  METHODS
@@ -168,6 +204,7 @@ public class BiCubicSpline{
             for(int i=0; i<this.nPoints; i++){
              	for(int j=0; j<this.mPoints; j++){
                     this.y[i][j]=y[i][j];
+                    this.yT[j][i]=y[i][j];
                 }
         	}
 
@@ -181,6 +218,18 @@ public class BiCubicSpline{
 	        	this.csn[i].calcDeriv();
 	        	this.d2ydx2inner[i]=this.csn[i].getDeriv();
 	    	}
+
+	    	this.csmT = new CubicSpline(this.nPointsT);
+        	this.csnT = CubicSpline.oneDarray(this.nPointsT, this.mPointsT);
+        	double[] yTempnT = new double[mPointsT];
+
+	    	for(int i=0; i<this.nPointsT; i++){
+	        	for(int j=0; j<mPointsT; j++)yTempnT[j]=yT[i][j];
+	        	this.csnT[i].resetData(x1,yTempnT);
+	        	this.csnT[i].calcDeriv();
+	        	this.d2ydx2innerT[i]=this.csnT[i].getDeriv();
+	    	}
+
 	    	this.derivCalculated = true;
 
     	}
@@ -210,6 +259,13 @@ public class BiCubicSpline{
     	public double[][] getDeriv(){
     	    return this.d2ydx2inner;
     	}
+
+    	// Get inner matrix of transpose derivatives
+    	// Primarily used by TriCubicSpline
+    	public double[][] getDerivTranspose(){
+    	    return this.d2ydx2innerT;
+    	}
+
 
    	    // Get minimum limits
     	public double[] getXmin(){
@@ -243,9 +299,19 @@ public class BiCubicSpline{
     	    this.derivCalculated = true;
     	}
 
+    	// Set inner matrix of transpose derivatives
+    	// Primarily used by TriCubicSpline
+    	public void setDerivTranspose(double[][] d2ydx2){
+    	    this.d2ydx2innerT = d2ydx2;
+    	    this.derivCalculated = true;
+    	}
+
     	//	Returns an interpolated value of y for a value of x
     	//  	from a tabulated function y=f(x1,x2)
     	public double interpolate(double xx1, double xx2){
+
+    	    this.xx1 = xx1;
+    	    this.xx2 = xx2;
 
 	    	double[] yTempm = new double[this.nPoints];
 
@@ -253,7 +319,27 @@ public class BiCubicSpline{
 		    	yTempm[i]=this.csn[i].interpolate(xx2);
 	    	}
 	    	this.csm.resetData(x1,yTempm);
-	    	return this.csm.interpolate(xx1);
+	    	this.interpolatedValue = this.csm.interpolate(xx1);
+
+	    	double[] yTempmT = new double[this.nPointsT];
+
+            for (int i=0;i<this.nPointsT;i++){
+		    	yTempmT[i]=this.csnT[i].interpolate(xx1);
+	    	}
+	    	this.csmT.resetData(x2,yTempmT);
+	    	this.interpolatedValueTranspose = this.csmT.interpolate(xx2);
+
+	    	this.interpolatedValueMean = (this.interpolatedValue + this.interpolatedValueTranspose)/2.0;
+	    	return this.interpolatedValueMean;
     	}
+
+    	// Returns mean interpolated value, interpolated value for data as entered, interpolated value for transposed matrix, xx1 value and xx2 value
+    	public double[] getInterpolatedValues(){
+    	    double[] ret = {this.interpolatedValueMean, this.interpolatedValue, this.interpolatedValueTranspose, this.xx1, this.xx2};
+    	    return ret;
+    	}
+
+
+
 }
 

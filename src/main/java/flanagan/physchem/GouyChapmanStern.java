@@ -1051,9 +1051,7 @@ public class GouyChapmanStern{
             sigmaHigh -= sigmaAdsNeg;
             sigmaLow  += sigmaAdsPos;
         }
-        System.out.println("pp0 "+ sigmaLow + " " + psi +  " "+ionSum + " " +ionSum*this.eightTerm);
         double sFuncLow = this.sigmaFunction2(sigmaLow, psi);
-        System.out.println("pp1 "+ sigmaHigh + " " + psi +  " "+ionSum + " " +this.chargeValue+" "+Math.sqrt(ionSum*this.eightTerm) + " " + this.expTermOver2*psi*this.chargeValue + " " + Fmath.sinh(this.expTermOver2*psi*this.chargeValue));
         double sFuncHigh = this.sigmaFunction2(sigmaHigh, psi);
         if(sFuncHigh*sFuncLow>0.0D)throw new IllegalArgumentException("root not bounded");
         double check = Math.abs(sigmaHigh)*1e-6;
@@ -1093,13 +1091,11 @@ public class GouyChapmanStern{
 
     // function to calculate sigma for surfaceChargeDensity2()
     private double sigmaFunction2(double sigma, double psi){
-        System.out.println("F2begin");
         // bisection method for psi(delta)
         double psiLow = -10*psi;
         double pFuncLow = this.psiFunctionQ(psiLow, psi, sigma);
         double psiHigh = 10*psi;
         double pFuncHigh = this.psiFunctionQ(psiHigh, psi, sigma);
-        System.out.println("qq " + pFuncLow + " "+pFuncHigh+" "+ psiLow+" "+psiHigh);
         if(pFuncHigh*pFuncLow>0.0D)throw new IllegalArgumentException("root not bounded");
         double check = Math.abs(psi)*1e-6;
         boolean test = true;
@@ -1134,7 +1130,6 @@ public class GouyChapmanStern{
             sigmaEst += bulkConcn[i];
         }
         sigmaEst = Math.sqrt(this.eightTerm*sigmaEst/2.0D)*Fmath.sinh(this.expTermOver2*psi*this.chargeValue);
-        System.out.println("F2end");
 
         return sigma + this.adsorbedChargeDensity - sigmaEst;
     }
@@ -1259,7 +1254,6 @@ public class GouyChapmanStern{
         this.sternDelta = this.calcDeltaQ(psiDelta);
         this.diffPotential = psiDelta;
         this.sternCap = this.epsilonStern*Fmath.EPSILON_0/this.sternDelta;
-        System.out.println("aaa " + psiDelta + " " + psi0 + " " + sigma/this.sternCap + " " + sigma);
         return psiDelta - psi0 + sigma/this.sternCap;
     }
 
@@ -1751,7 +1745,7 @@ public class GouyChapmanStern{
     // Get initial concentrations (M)
     public double[] getInitConcns(){
         if(!this.psi0set && !this.sigmaSet)unpack();
-        double[] conc = this.initConcn.clone();
+        double[] conc = Conv.copy(this.initConcn);
         for(int i=0; i<this.numOfIons; i++)conc[i] *= 1e-3;
         return conc;
     }
@@ -1762,7 +1756,7 @@ public class GouyChapmanStern{
         if(this.sigmaSet && !this.psi0set)this.getSurfacePotential();
         if(this.psi0set && !this.sigmaSet)this.getSurfaceChargeDensity();
 
-        double[] conc = this.bulkConcn.clone();
+        double[] conc = Conv.copy(this.bulkConcn);
         for(int i=0; i<this.numOfIons; i++)conc[i] *= 1e-3;
         return conc;
     }

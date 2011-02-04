@@ -11,7 +11,7 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:   29 December 2005 (adapted from Minimisation)
-*   UPDATES:    28 December 2007, 10/12 May 2008, 4 July 2008, 28 July 2008, 12 January 2010
+*   UPDATES:    28 December 2007, 10/12 May 2008, 4 July 2008, 28 July 2008, 12 January 2010, 23 September 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
@@ -147,7 +147,18 @@ public class Maximisation{
         if(step.length!=start.length)throw new IllegalArgumentException("step array length " + step.length + " and initial estimate array length " + start.length + " are of different");
 
         // check for zero step sizes
-        for(int i=0; i<np; i++)if(step[i]==0.0D)throw new IllegalArgumentException("step " + i+ " size is zero");
+        for(int i=0; i<np; i++){
+            if(step[i]==0.0D){
+                    if(start[i]!=0.0){
+                    step[i] = start[i]*0.1;
+                }
+                else{
+                    step[i] = 1.0;
+                    System.out.println("As no step size has been entered for an itial estimate of zero an initial step size of unity has been used");
+                    System.out.println("You are advised to repeat the maximization using one of the methods allowing the setting of an appropriate non-zero initial step size");
+                }
+            }
+        }
 
 	    // set up arrays
 	    this.paramValue = new double[np];

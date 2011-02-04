@@ -503,21 +503,21 @@ public class Donnan{
 
     // Method to get the bulk concentrations of the ionic species, in partition A, at the minimum [M]
     public double[] getConcnA(){
-        double[] concn = this.concnA.clone();
+        double[] concn = Conv.copy(this.concnA);
         for(int i=0; i<this.numOfIons; i++)concn[i] *= 1e-3;
         return concn;
     }
 
     // Method to get the bulk concentrations of the ionic species, in partition B, at the minimum [M]
     public double[] getConcnB(){
-        double[] concn = this.concnB.clone();
+        double[] concn = Conv.copy(this.concnB);
         for(int i=0; i<this.numOfIons; i++)concn[i] *= 1e-3;
         return concn;
     }
 
     // Method to get the bulk concentrations of the complex species, in partition B, at the minimum [M]
     public double[] getComplex(){
-        double[] concn = this.complex.clone();
+        double[] concn = Conv.copy(this.complex);
         for(int i=0; i<this.numOfIons; i++)concn[i] *= 1e-3;
         return concn;
     }
@@ -527,7 +527,7 @@ public class Donnan{
         if(!this.includeIc){
             System.out.println("Class: Donnan\nMethod: getExcessConcnA\nThe values of the excess concentrations have not been calculated\nzeros returned");
         }
-        double[] concn = this.excessConcnA.clone();
+        double[] concn = Conv.copy(this.excessConcnA);
         for(int i=0; i<this.numOfIons; i++)concn[i] *= 1e-3;
         return concn;
     }
@@ -537,7 +537,7 @@ public class Donnan{
         if(!this.includeIc){
             System.out.println("Class: Donnan\nMethod: getExcessConcnA\nThe values of the excess concentrations have not been calculated\nzeros returned");
         }
-        double[] concn = this.excessConcnB.clone();
+        double[] concn = Conv.copy(this.excessConcnB);
         for(int i=0; i<this.numOfIons; i++)concn[i] *= 1e-3;
         return concn;
     }
@@ -547,7 +547,7 @@ public class Donnan{
         if(!this.includeIc){
             System.out.println("Class: Donnan\nMethod: getExcessConcnA\nThe values of the excess concentrations have not been calculated\nzeros returned");
         }
-        double[] concn = this.excessComplex.clone();
+        double[] concn = Conv.copy(this.excessComplex);
         for(int i=0; i<this.numOfIons; i++)concn[i] *= 1e-3;
         return concn;
     }
@@ -692,11 +692,11 @@ public class Donnan{
         double[] partCoeffhold = null;
 
         if(this.nonZeroConcns<this.numOfIons){
-            assocConstshold = this.assocConsts.clone();
-            radiihold = this.radii.clone();
-            chargeshold = this.charges.clone();
-            deltaMu0hold = this.deltaMu0.clone();
-            partCoeffhold = this.partCoeff.clone();
+            assocConstshold = Conv.copy(this.assocConsts);
+            radiihold = Conv.copy(this.radii);
+            chargeshold = Conv.copy(this.charges);
+            deltaMu0hold = Conv.copy(this.deltaMu0);
+            partCoeffhold = Conv.copy(this.partCoeff);
             boolean test = true;
             int jj = 0;
             while(test){

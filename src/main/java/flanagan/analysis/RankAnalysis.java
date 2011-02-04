@@ -38,6 +38,7 @@ package flanagan.analysis;
 import flanagan.analysis.Stat;
 import flanagan.analysis.Cronbach;
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 import flanagan.math.Matrix;
 import flanagan.math.ArrayMaths;
 import flanagan.io.FileOutput;
@@ -88,8 +89,8 @@ public class RankAnalysis{
     // CONSTRUCTORS
     // Individual error for each value
     public RankAnalysis(double[][] values, double[][] errors){
-        this.values = values;
-        this.errors = errors;
+        this.values = Conv.copy(values);
+        this.errors = Conv.copy(errors);
         this.errorType = 0;
         this.preprocessDataOne();
     }
@@ -177,8 +178,8 @@ public class RankAnalysis{
 
     // Common error for each row
     public RankAnalysis(double[][] values, double[] errors){
-        this.values = values;
-        this.errors = this.oneToTwo(errors, this.values[0].length);
+        this.values = Conv.copy(values);
+        this.errors = this.oneToTwo(Conv.copy(errors), this.values[0].length);
         this.errorType = 1;
         this.preprocessDataOne();
     }
@@ -287,7 +288,7 @@ public class RankAnalysis{
 
     // Common error for all values
     public RankAnalysis(double[][] values, double commonError){
-        this.values = values;
+        this.values = Conv.copy(values);
         this.errorType = 2;
         this.preprocessDataTwo(commonError);
     }
@@ -358,7 +359,7 @@ public class RankAnalysis{
 
     // No errors supplied
     public RankAnalysis(double[][] values){
-        this.values = values;
+        this.values = Conv.copy(values);
         this.errorType = 3;
         this.preprocessDataThree();
     }

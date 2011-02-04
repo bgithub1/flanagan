@@ -9,14 +9,14 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       October 2008
-*   AMENDED:    12 October 2008
+*   AMENDED:    12 October 2008, 1-18 November 2010, 27 November 2010, 3-4 December 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/Cronbach.html
 *
-*   Copyright (c) 2008 Michael Thomas Flanagan
+*   Copyright (c) 2008-2010 Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *
@@ -63,6 +63,8 @@ public class Scores{
     protected boolean fileNumberingSet = false;                                     // = output file of identical name to existing file overwrites existing file
                                                                                     // = true incremented number added to output file name to prevent overwriting
     protected int trunc = 6;                                                        // number of decimal places in output data
+                                                                                    // overriden by the precision of the input data if this is greater
+    protected boolean truncAll = false;                                             // if true - the above truncation is not overriden by the precision of the input data if this is greater
 
     protected int originalDataType = -1;                                            // = 1 - String[][]  (including read from file);
                                                                                     // = 2 - double[][]
@@ -118,17 +120,17 @@ public class Scores{
     protected boolean dichotomousOverall = false;                                   // true if all the data is dichotomous
     protected boolean dichotomousCheckDone = false;                                 // true if check for dichotomous data performed
 
-    protected boolean letterToNumeralSet = false;                                   // = true if user set the letter to numeral option allowing alphabetic response input
+    protected boolean letterToNumeralSet = true;                                    // = true if user set the letter to numeral option allowing alphabetic response input
 
     protected boolean ignoreNoResponseRequests = false;                             // = true - requests for 'no resonse' options are not displayed
 
     protected double itemDeletionPercentage = 100.0;                                // percentage of no responses allowed within an item before the item is deleted
     protected boolean itemDeletionPercentageSet = false;                            // = true when this percentage is reset
 
-    protected double personDeletionPercentage = 30.0;                               // percentage of no responses allowed within a person's responses before the person is deleted
+    protected double personDeletionPercentage = 100.0;                              // percentage of no responses allowed within a person's responses before the person is deleted
     protected boolean personDeletionPercentageSet = false;                          // = true when this percentage is reset
 
-    protected int replacementOption = 1;                                            // option flag for a missing response if deletion not carried out
+    protected int replacementOption = 3;                                            // option flag for a missing response if deletion not carried out
                                                                                     // option = 1 - score replaced by zero
                                                                                     // option = 2 - score replaced by person's mean
                                                                                     // option = 3 - score replaced by item mean (default option)
@@ -348,6 +350,10 @@ public class Scores{
     protected boolean nFactorOption = false;                                        // = true  varaiance, covariance and standard deviation denominator = n
                                                                                     // = false varaiance, covariance and standard deviation denominator = n-1
 
+    protected int sameCheck = 0;                                                    // = 0;     no row or column with identical elements in the data matrix
+                                                                                    // = 1;     row/s of identical elements found
+                                                                                    // = 2;     column/s of identical elements found
+                                                                                    // = 3;     row/s and column/s of identical elements found
 
     // CONSTRUCTOR
     public Scores(){
@@ -554,6 +560,7 @@ public class Scores{
                 this.nItems = this.nItems - this.nDeletedItems;
                 this.nScores = this.nPersons*this.nItems;
                 this.scores0 = scoreTemp;
+                this.scores1 = this.transpose0to1(this.scores0);
                 this.itemNames = nameTemp;
             }
             if(this.nDeletedItems==0){
@@ -677,8 +684,10 @@ public class Scores{
                             break;
                     default: throw new IllegalArgumentException("!! It should not be possible to have an option choice (replacementOption) = " + replacementOption);
                 }
+                this.nReplacements = rcounter--;
             }
         }
+        this.scores1 = this.transpose0to1(this.scores0);
         this.noResponseHandlingSet = true;
     }
 
@@ -820,7 +829,7 @@ public class Scores{
     public void readScoresAsRowPerItem(){
         //Select file
         int lineNumber = 1;
-        FileChooser fin = new FileChooser("C:\\Java6\\Scores");
+        FileChooser fin = new FileChooser();
 
         // Read in file name
         this.inputFilename = fin.selectFile();
@@ -981,7 +990,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 1;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1011,7 +1020,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 2;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1042,7 +1051,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)scores.copy();
         this.originalDataType = 3;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1073,7 +1082,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 4;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1103,7 +1112,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 5;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1133,7 +1142,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 6;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1171,7 +1180,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 7;
         this.originalDataOrder = 0;
         this.dataEntered = true;
@@ -1189,7 +1198,7 @@ public class Scores{
    public void readScoresAsRowPerPerson(){
         //Select file
         int lineNumber = 1;
-        FileChooser fin = new FileChooser("C:\\Java6\\Scores");
+        FileChooser fin = new FileChooser();
 
         // Read in file name
         this.inputFilename = fin.selectFile();
@@ -1325,7 +1334,7 @@ public class Scores{
     // etc.
     // scores may be represented by a number, yes, Yes, YES, no, No, NO, true, True, TRUE, false, False or FALSE
     // 'no responses' may be represented by any one word text except that that corresponds to a number, yes, Yes, YES, no, No, NO, true, True, TRUE, false, False or FALSE
-    public void enterScoresAsRowPerIperson(String[][] scores){
+    public void enterScoresAsRowPerPerson(String[][] scores){
 
         // Determine number of items, persons and scores
         this.nPersons = scores.length;
@@ -1343,11 +1352,17 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
-        this.originalDataType = 2;
+        this.originalData = (Object)Conv.copy(scores);
+        this.originalDataType = 1;
         this.originalDataOrder = 1;
         this.dataEntered = true;
     }
+
+    // A mistaken title retained for compatibility
+    public void enterScoresAsRowPerIperson(String[][] scores){
+        this.enterScoresAsRowPerPerson(scores);
+    }
+
 
 
     // Enter scores as a matrix with rows of scores for each person - matrix of scores entered as double[][]
@@ -1373,14 +1388,14 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 2;
         this.originalDataOrder = 1;
         this.dataEntered = true;
     }
 
 
-    // Enter scores as a matrix with rows of scores for each iperson - matrix of scores entered as Matrix
+    // Enter scores as a matrix with rows of scores for each person - matrix of scores entered as Matrix
     // e.g. scores1[0][0] to scores1[0][nItems-1] =  scores for each item in turn for the first person
     //      scores1[1][0] to scores1[1][nItems-1] =  scores for each item in turn for the second person
     // etc.
@@ -1404,7 +1419,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)scores.copy();
         this.originalDataType = 3;
         this.originalDataOrder = 1;
         this.dataEntered = true;
@@ -1433,7 +1448,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 4;
         this.originalDataOrder = 1;
         this.dataEntered = true;
@@ -1463,7 +1478,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 5;
         this.originalDataOrder = 1;
         this.dataEntered = true;
@@ -1494,7 +1509,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 6;
         this.originalDataOrder = 1;
         this.dataEntered = true;
@@ -1532,7 +1547,7 @@ public class Scores{
         }
 
         // Store entered data
-        this.originalData = (Object)scores;
+        this.originalData = (Object)Conv.copy(scores);
         this.originalDataType = 7;
         this.originalDataOrder = 1;
         this.dataEntered = true;
@@ -1549,9 +1564,15 @@ public class Scores{
     }
 
     //  Allow alphabetic responses, i.e. A, B, C, to be converted to numerical responses, i.e. 1, 2, 3, 4
-    //  A, B, C, to be converted to numerical responses, e.g. 1, 2, 3, 4
+    //  This is the default option (17 November 2010)
+    // Need only be called to restore after suspensin - see immediately below
     public void letterToNumeral(){
         this.letterToNumeralSet = true;
+    }
+
+    //  Suspend alphabetic responses, i.e. A, B, C, conversion to numerical responses, i.e. 1, 2, 3, 4
+    public void suspendLetterToNumeral(){
+        this.letterToNumeralSet = false;
     }
 
     //  Allow other dichotomous data pairs than the default pairs,
@@ -1772,6 +1793,7 @@ public class Scores{
                         if(this.originalDataOrder==1){
                             holdingArrayD = this.transpose1to0(holdingArrayD);
                         }
+                        holdingArrayS = this.dataToString(holdingArrayD);
                         break;
                 case 3: holdingArrayD = ((Matrix)originalData).getArrayCopy();
                         this.checkLengths(holdingArrayD);
@@ -1779,6 +1801,7 @@ public class Scores{
                         if(this.originalDataOrder==1){
                             holdingArrayD = this.transpose1to0(holdingArrayD);
                         }
+                        holdingArrayS = this.dataToString(holdingArrayD);
                         break;
                 case 4: float[][] holdingArrayF = (float[][])originalData;
                         this.checkLengths(holdingArrayF);
@@ -1794,6 +1817,7 @@ public class Scores{
                         if(this.originalDataOrder==1){
                             holdingArrayD = this.transpose1to0(holdingArrayD);
                         }
+                        holdingArrayS = this.dataToString(holdingArrayD);
                         break;
                 case 5: int[][] holdingArrayI = (int[][])originalData;
                         this.checkLengths(holdingArrayI);
@@ -1809,6 +1833,7 @@ public class Scores{
                         if(this.originalDataOrder==1){
                             holdingArrayD = this.transpose1to0(holdingArrayD);
                         }
+                        holdingArrayS = this.dataToString(holdingArrayD);
                         break;
                 case 6: char[][] holdingArrayC = (char[][])originalData;
                         this.checkLengths(holdingArrayC);
@@ -1833,7 +1858,53 @@ public class Scores{
                         if(this.originalDataOrder==1){
                             holdingArrayB = this.transpose1to0(holdingArrayB);
                         }
+                        holdingArrayS = this.dataToString(holdingArrayB);
                         break;
+                default: throw new IllegalArgumentException("Original data type, " + originalDataType + ", not recognised");
+            }
+
+            // Check for y-n dichotomous pair
+            if(this.letterToNumeralSet){
+                for(int i=0; i<this.nItems; i++){
+                    int nYN = 0;
+                    for(int j=0; j<this.nPersons; j++){
+                        char elem = holdingArrayS[i][j].charAt(0);
+                        if((elem=='y' || elem=='n' || elem=='Y' || elem=='N' || elem==' ') && holdingArrayS[i][j].length()==1){
+                            nYN++;
+                        }
+                    }
+                    if(nYN==this.nPersons){
+                        for(int j=0; j<this.nPersons; j++){
+                            char elem = holdingArrayS[i][j].charAt(0);
+                            if((elem=='y' || elem=='Y') && holdingArrayS[i][j].length()==1){
+                                holdingArrayS[i][j] = "1";
+                            }
+                            else{
+                                if((elem=='n' || elem=='N') && holdingArrayS[i][j].length()==1){
+                                    holdingArrayS[i][j] = "-1";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Convert letters to numbers (modification added on 1 November 2010)
+            if(this.letterToNumeralSet){
+                for(int i=0; i<this.nItems; i++){
+                    for(int j=0; j<this.nPersons; j++){
+                        char elem = holdingArrayS[i][j].charAt(0);
+                        if((int)elem>64 && elem<91 && holdingArrayS[i][j].length()==1){
+                            holdingArrayS[i][j] = "" + ((int)elem - 63);
+                        }
+                        else{
+                            if((int)elem>96 && elem<123 && holdingArrayS[i][j].length()==1){
+                                holdingArrayS[i][j] = "" + ((int)elem - 96);
+                            }
+                        }
+                    }
+                }
+                this.letterToNumeralSet = false;
             }
 
 
@@ -1850,7 +1921,7 @@ public class Scores{
                                         }
                                         else{
                                             if(holdingArrayS[i][j].equalsIgnoreCase(this.otherFalse)){
-                                                this.scores0[i][j]=0;
+                                                this.scores0[i][j]=-1;
                                                 elementSet = true;
                                             }
                                             else{
@@ -1858,25 +1929,6 @@ public class Scores{
                                                elementSet = true;
                                             }
                                         }
-                                }
-                                if(!elementSet){
-                                    if(this.letterToNumeralSet){
-                                        char elem = holdingArrayS[i][j].charAt(0);
-                                        if((int)elem>64 && elem<91 && holdingArrayS[i][j].length()==1){
-                                            this.scores0[i][j] = elem - 63;
-                                            elementSet = true;
-                                        }
-                                        else{
-                                            if((int)elem>96 && elem<123 && holdingArrayS[i][j].length()==1){
-                                                this.scores0[i][j] = elem - 96;
-                                                elementSet = true;
-                                            }
-                                            else{
-                                               this.scores0[i][j] = Double.NaN;
-                                               elementSet = true;
-                                            }
-                                        }
-                                    }
                                 }
                                 if(!elementSet){
                                     if(holdingArrayS[i][j].equalsIgnoreCase("yes") || holdingArrayS[i][j].equalsIgnoreCase("y") || holdingArrayS[i][j].equalsIgnoreCase("true")){
@@ -1885,7 +1937,7 @@ public class Scores{
                                     }
                                     else{
                                         if(holdingArrayS[i][j].equalsIgnoreCase("no") || holdingArrayS[i][j].equalsIgnoreCase("n") || holdingArrayS[i][j].equalsIgnoreCase("false")){
-                                            this.scores0[i][j]=0;
+                                            this.scores0[i][j]=-1;
                                             elementSet = true;
                                         }
                                     }
@@ -1928,12 +1980,22 @@ public class Scores{
                             }
                         }
                         break;
+
             }
 
-
+            // Check maximum precision of entered data
+            int maxPrec = 0;
+            int prec0 = 0;
+            for(int i=0; i<this.nItems; i++){
+                for(int j=0; j<this.nPersons; j++){
+                    prec0 = Fmath.checkPrecision(scores0[i][j]);
+                    if(prec0>maxPrec)maxPrec = prec0;
+                }
+            }
+            if(maxPrec>this.trunc && !this.truncAll)this.trunc = maxPrec;
 
             // assign original scores to instance variable
-            this.originalScores0 = scores0.clone();
+            this.originalScores0 = Conv.copy(scores0);
             this.originalScores1 = this.transpose0to1(scores0);
             this.originalNitems = this.nItems;
             this.originalNpersons = this.nPersons;
@@ -1942,7 +2004,11 @@ public class Scores{
             // Handle no responses
             // Check for and carry out item deletion
             // check for and carry out no response replacement
-            if(this.nNaN>0)this.noResponseHandling();
+            if(this.nNaN>0){
+                this.noResponseHandling();
+                this.scores1 = this.transpose0to1(this.scores0);
+            }
+
 
             // Create row - column transposed matrix
             this.scores1 = new double[this.nPersons][this.nItems];
@@ -1964,6 +2030,9 @@ public class Scores{
             }
             this.standardizedScores1 = this.transpose0to1(this.standardizedScores0);
 
+            // Check for row or column containing identical elements
+            this.checkForIdenticalElements();
+
             // Calculate means, standard deviations and variances of all items and all persons sets
             this.meansAndVariances();
 
@@ -1974,6 +2043,56 @@ public class Scores{
         }
     }
 
+    // Check if row or column of all zeros in the data
+    private void checkForIdenticalElements(){
+
+        boolean test = false;
+        for(int i=0; i<this.nItems; i++){
+            int sum = 0;
+            double check = this.scores0[i][0];
+            for(int j=0; j<this.nPersons; j++)if(this.scores0[i][j]==check)sum++;
+            if(sum==this.nPersons){
+                this.sameCheck = 1;
+                test = true;
+            }
+        }
+
+        for(int i=0; i<this.nPersons; i++){
+            int sum = 0;
+            double check = this.scores0[0][i];
+            for(int j=0; j<this.nItems; j++)if(this.scores0[j][i]==check)sum++;
+            if(sum==this.nItems){
+                this.sameCheck = 2;
+                if(test)this.sameCheck = 3;
+            }
+        }
+    }
+
+    // Convert double data to String data
+    private String[][] dataToString(double[][] ddata){
+            int nn = ddata.length;
+            int mm = ddata[0].length;
+            String[][] sdata = new String[nn][mm];
+            for(int i=0; i<nn; i++){
+                for(int j=0; j<mm; j++){
+                    sdata[i][j] = (new Double(ddata[i][j])).toString();
+                }
+            }
+            return sdata;
+    }
+
+    // Convert boolean data to String data
+    private String[][] dataToString(boolean[][] ddata){
+            int nn = ddata.length;
+            int mm = ddata[0].length;
+            String[][] sdata = new String[nn][mm];
+            for(int i=0; i<nn; i++){
+            for(int j=0; j<mm; j++){
+                    sdata[i][j] = (new Boolean(ddata[i][j])).toString();
+                }
+            }
+            return sdata;
+    }
 
     // RETURN RESPONSES
     // Return responses as entered
@@ -4043,6 +4162,7 @@ public class Scores{
             this.rawCorrelationCoefficients[i][i] = 1.0;
             for(int j=i+1; j<this.nItems; j++){
                 this.rawCorrelationCoefficients[i][j] = this.rawCovariances[i][j]/Math.sqrt(this.rawCovariances[i][i]*this.rawCovariances[j][j]);
+                if(Fmath.isNaN(this.rawCorrelationCoefficients[i][j]))this.rawCorrelationCoefficients[i][j] = 0.0;
                 this.rawCorrelationCoefficients[j][i] = this.rawCorrelationCoefficients[i][j];
             }
         }
@@ -4050,6 +4170,7 @@ public class Scores{
         // Raw data item-(item totals) correlation coefficients
         for(int i=0; i<this.nItems; i++){
             this.rawCorrelationCoefficients[i][this.nItems] = this.rawCovariances[i][this.nItems]/Math.sqrt(this.rawCovariances[i][i]*this.rawCovariances[this.nItems][this.nItems]);
+            if(Fmath.isNaN(this.rawCorrelationCoefficients[i][this.nItems]))this.rawCorrelationCoefficients[i][this.nItems] = 0.0;
             this.rawCorrelationCoefficients[this.nItems][i] = this.rawCorrelationCoefficients[i][this.nItems];
         }
         this.rawCorrelationCoefficients[this.nItems][this.nItems] = 1.0;
@@ -4098,6 +4219,7 @@ public class Scores{
             this.standardizedCorrelationCoefficients[i][i] = 1.0;
             for(int j=i+1; j<this.nItems; j++){
                 this.standardizedCorrelationCoefficients[i][j] = this.standardizedCovariances[i][j]/Math.sqrt(this.standardizedCovariances[i][i]*this.standardizedCovariances[j][j]);
+                if(Fmath.isNaN(this.standardizedCorrelationCoefficients[i][j]))this.standardizedCorrelationCoefficients[i][j] = 0.0;
                 this.standardizedCorrelationCoefficients[j][i] = this.standardizedCorrelationCoefficients[i][j];
             }
         }
@@ -4105,6 +4227,7 @@ public class Scores{
         // Standardized data item-(item totals) correlation coefficients
         for(int i=0; i<this.nItems; i++){
             this.standardizedCorrelationCoefficients[i][this.nItems] = this.standardizedCovariances[i][this.nItems]/Math.sqrt(this.standardizedCovariances[i][i]*this.standardizedCovariances[this.nItems][this.nItems]);
+            if(Fmath.isNaN(this.standardizedCorrelationCoefficients[i][this.nItems]))this.standardizedCorrelationCoefficients[i][this.nItems] = 0.0;
             this.standardizedCorrelationCoefficients[this.nItems][i] = this.standardizedCorrelationCoefficients[i][this.nItems];
         }
         this.standardizedCorrelationCoefficients[this.nItems][this.nItems] = 1.0;
@@ -4615,8 +4738,17 @@ public class Scores{
 
     // Set number of decimal places in the output data
     // default value = 6
+    // trunc is overriden by the precision of the input data if this is greater than trunc
     public void numberOfDecimalPlaces(int trunc){
         this.trunc = trunc;
+    }
+
+    // Set number of decimal places in the output data
+    // default value = 6
+    // trunc is NOT overriden by the precision of the input data if this is greater than trunc
+    public void numberOfDecimalPlacesAll(int trunc){
+        this.trunc = trunc;
+        this.truncAll = true;
     }
 
     // Type of output file
@@ -4639,6 +4771,237 @@ public class Scores{
         this.fileNumberingSet = false;
     }
 
+    // Return data file title
+    public String getTitle(){
+        return this.title[0];
+    }
+
+    // Return input file name
+    public String getInputFileName(){
+        return this.inputFilename;
+    }
+
+    // OUTPUT THE PROCESSED DATA
+
+    // Output the processed date in the same item/person/row/column format as entered data
+    // No input file name entered via method argument list
+    public void outputProcessedData(){
+        if(!this.dataPreprocessed)this.preprocessData();
+        this.outputFilename = "ScoresOutput";
+        if(this.fileOption==1){
+            this.outputFilename += ".txt";
+        }
+        else{
+            this.outputFilename += ".xls";
+        }
+        String message1 = "Output file name for the processes scores:";
+        String message2 = "\nEnter the required name (as a single word) and click OK ";
+        String message3 = "\nor simply click OK for default value";
+        String message = message1 + message2 + message3;
+        String defaultName = this.outputFilename;
+        this.outputFilename = Db.readLine(message, defaultName);
+        this.outputProcessedData(this.outputFilename);
+    }
+
+
+    // Output the processed date in the same item/person/row/column format as entered data
+    // input file name via method argument list
+    public void outputProcessedData(String filename){
+        this.outputProcessedDataCommon(filename, this.originalDataOrder);
+    }
+
+
+    // Output the processed date as the alternative item/person/row/column format to that of the entered data
+    // No input file name entered via method argument list
+    public void outputProcessedDataAlternate(){
+        if(!this.dataPreprocessed)this.preprocessData();
+        this.outputFilename = "ScoresOutput";
+        if(this.fileOption==1){
+            this.outputFilename += ".txt";
+        }
+        else{
+            this.outputFilename += ".xls";
+        }
+        String message1 = "Output file name for the processes scores:";
+        String message2 = "\nEnter the required name (as a single word) and click OK ";
+        String message3 = "\nor simply click OK for default value";
+        String message = message1 + message2 + message3;
+        String defaultName = this.outputFilename;
+        this.outputFilename = Db.readLine(message, defaultName);
+        this.outputProcessedDataAlternate(this.outputFilename);
+    }
+
+        // Output the processed date in the same item/person/row/column format as entered data
+    // input file name via method argument list
+    public void outputProcessedDataAlternate(String filename){
+        int orderChoice = 0;
+        if(this.originalDataOrder==0)orderChoice = 1;
+        this.outputProcessedDataCommon(filename, orderChoice);
+    }
+
+
+    // Output the processed date of either order format
+    // input file name via method argument list
+    private void outputProcessedDataCommon(String filename, int orderChoice){
+        if(!this.dataPreprocessed)this.preprocessData();
+        // Open output file
+        this.outputFilename = filename;
+        String outputFilenameWithoutExtension = null;
+        String extension = null;
+        int pos = filename.indexOf('.');
+        if(pos==-1){
+            outputFilenameWithoutExtension = filename;
+            if(this.fileOption==1){
+                this.outputFilename += ".txt";
+            }
+            else{
+                this.outputFilename += ".xls";
+            }
+        }
+        else{
+            extension = (filename.substring(pos)).trim();
+
+            outputFilenameWithoutExtension = (filename.substring(0, pos)).trim();
+            if(extension.equalsIgnoreCase(".xls")){
+                if(this.fileOption==1){
+                    if(this.fileOptionSet){
+                        String message1 = "Your entered output file type is .xls";
+                        String message2 = "\nbut you have chosen a .txt output";
+                        String message = message1 + message2;
+                        String headerComment = "Your output file name extension";
+                        String[] comments = {message, "replace it with .txt [text file]"};
+                        String[] boxTitles = {"Retain", ".txt"};
+                        int defaultBox = 1;
+                        int opt =  Db.optionBox(headerComment, comments, boxTitles, defaultBox);
+                        if(opt==2)this.outputFilename = outputFilenameWithoutExtension + ".txt";
+                    }
+                    else{
+                        this.fileOption=2;
+                    }
+                }
+             }
+
+
+            if(extension.equalsIgnoreCase(".txt")){
+                if(this.fileOption==2){
+                    if(this.fileOptionSet){
+                        String message1 = "Your entered output file type is .txt";
+                        String message2 = "\nbut you have chosen a .xls output";
+                        String message = message1 + message2;
+                        String headerComment = "Your output file name extension";
+                        String[] comments = {message, "replace it with .xls [Excel file]"};
+                        String[] boxTitles = {"Retain", ".xls"};
+                        int defaultBox = 1;
+                        int opt =  Db.optionBox(headerComment, comments, boxTitles, defaultBox);
+                        if(opt==2)this.outputFilename = outputFilenameWithoutExtension + ".xls";
+                    }
+                    else{
+                        this.fileOption=1;
+                    }
+                }
+             }
+
+             if(!extension.equalsIgnoreCase(".txt") && !extension.equalsIgnoreCase(".xls")){
+                    String message1 = "Your extension is " + extension;
+                    String message2 = "\n    Do you wish to retain it:";
+                    String message = message1 + message2;
+                    String headerComment = "Your output file name extension";
+                    String[] comments = {message, "replace it with .txt [text file]", "replace it with .xls [MS Excel file]"};
+                    String[] boxTitles = {"Retain", ".txt", ".xls"};
+                    int defaultBox = 1;
+                    int opt =  Db.optionBox(headerComment, comments, boxTitles, defaultBox);
+                    switch(opt){
+                        case 1: this.fileOption=1;
+                                break;
+                        case 2: this.outputFilename = outputFilenameWithoutExtension + ".txt";
+                                this.fileOption=1;
+                                break;
+                        case 3: this.outputFilename = outputFilenameWithoutExtension + ".xls";
+                                this.fileOption=2;
+                                break;
+                    }
+            }
+        }
+
+        if(orderChoice==0){
+            title[0] += "   (output: row per item)";
+        }
+        else{
+            title[0] += "   (output: row per person)";
+        }
+
+        if(this.fileOption==1){
+            this.outputText(orderChoice);
+        }
+        else{
+            this.outputExcel(orderChoice);
+        }
+    }
+
+
+    // Output processed data as a text file
+    private void outputText(int orderChoice){
+
+
+        FileOutput fout = new FileOutput(this.outputFilename);
+
+        fout.println(title[0]);
+        fout.println((this.nItems));
+        fout.println(this.nPersons);
+        for(int i=0; i<this.nItems; i++){
+            fout.printtab(this.itemNames[i]);
+        }
+        fout.println();
+        if(orderChoice==0){
+            for(int i=0; i<this.nItems; i++){
+                for(int j=0; j<this.nPersons; j++){
+                    fout.printtab(Fmath.truncate(this.scores0[i][j], this.trunc));
+                }
+                fout.println();
+            }
+        }
+        else{
+            for(int j=0; j<this.nPersons; j++){
+                for(int i=0; i<this.nItems; i++){
+                    fout.printtab(Fmath.truncate(this.scores1[j][i], trunc));
+                }
+                fout.println();
+            }
+        }
+        fout.close();
+    }
+
+
+    // Output processed data as a text file
+    private void outputExcel(int orderChoice){
+
+        FileOutput fout = new FileOutput(this.outputFilename);
+        fout.println(title[0]);
+        fout.println((this.nItems));
+        fout.println(this.nPersons);
+        for(int i=0; i<this.nItems; i++){
+            fout.printtab(this.itemNames[i]);
+        }
+        fout.println();
+        if(orderChoice==0){
+            for(int i=0; i<this.nItems; i++){
+                for(int j=0; j<this.nPersons; j++){
+                    fout.printtab(Fmath.truncate(this.scores0[i][j], this.trunc));
+                }
+                fout.println();
+            }
+        }
+        else{
+            for(int j=0; j<this.nPersons; j++){
+                for(int i=0; i<this.nItems; i++){
+                    fout.printtab(Fmath.truncate(this.scores1[j][i], this.trunc));
+                }
+                fout.println();
+            }
+        }
+        fout.close();
+    }
+
     // CONVERSIONS
     // Convert to PCA
     public PCA toPCA(){
@@ -4653,59 +5016,59 @@ public class Scores{
         pca.fileExtensions = this.fileExtensions;
         pca.fileNumberingSet = this.fileNumberingSet;
 
-        pca.originalDataType = this.originalDataType;                                            // - String[][]  (including read from file);
-        pca.originalDataOrder = this.originalDataOrder;                                           // - matrix columns = responses of a person
-        pca.originalData = this.originalData;                                           // Original data as entered
-        pca.scores0 = this.scores0.clone();                                             // individual scores -  after any 'no response' deletions or replacements
-        pca.originalScores0 = this.originalScores0.clone();                                     // scores0 before any 'no response' deletions or replacements
-        pca.standardizedScores0 = this.standardizedScores0.clone();                                 // standardized scores0
-        pca.scores1 = this.scores1.clone();                                             // individual scores -  after any 'no response' deletions or replacements
-        pca.originalScores1 = this.originalScores1.clone();                                     // scores1 before any 'no response' deletions or replacements
-        pca.standardizedScores1 = this.standardizedScores1.clone();                                 // standardized scores1
-        pca.dataEntered = this.dataEntered;                                          // = true when scores entered
-        pca.nItems = this.nItems;                                                       // number of items, after any deletions
-        pca.originalNitems = this.originalNitems;                                               // original number of items
-        pca.itemNames = this.itemNames.clone();                                            // names of the items
-        pca.originalItemNames = this.originalItemNames.clone();                                    // list of item names before any deletions
-        pca.itemNamesSet = this.itemNamesSet;                                         // = true when item names entered
-        pca.nPersons = this.nPersons;                                                     // number of persons, after any deletions
-        pca.originalNpersons = this.originalNpersons;                                             // original number of persons
+        pca.originalDataType = this.originalDataType;                                               // - String[][]  (including read from file);
+        pca.originalDataOrder = this.originalDataOrder;                                             // - matrix columns = responses of a person
+        pca.originalData = this.originalData;                                                       // Original data as entered
+        pca.scores0 = Conv.copy(this.scores0);                                                         // individual scores -  after any 'no response' deletions or replacements
+        pca.originalScores0 = Conv.copy(this.originalScores0);                                         // scores0 before any 'no response' deletions or replacements
+        pca.standardizedScores0 = Conv.copy(this.standardizedScores0);                                 // standardized scores0
+        pca.scores1 = Conv.copy(this.scores1);                                                         // individual scores -  after any 'no response' deletions or replacements
+        pca.originalScores1 = Conv.copy(this.originalScores1);                                         // scores1 before any 'no response' deletions or replacements
+        pca.standardizedScores1 = Conv.copy(this.standardizedScores1);                                 // standardized scores1
+        pca.dataEntered = this.dataEntered;                                                         // = true when scores entered
+        pca.nItems = this.nItems;                                                                   // number of items, after any deletions
+        pca.originalNitems = this.originalNitems;                                                   // original number of items
+        pca.itemNames = Conv.copy(this.itemNames);                                                     // names of the items
+        pca.originalItemNames = Conv.copy(this.originalItemNames);                                     // list of item names before any deletions
+        pca.itemNamesSet = this.itemNamesSet;                                                       // = true when item names entered
+        pca.nPersons = this.nPersons;                                                               // number of persons, after any deletions
+        pca.originalNpersons = this.originalNpersons;                                               // original number of persons
         pca.nScores = this.nScores;
-        pca.originalNscores = this.originalNscores;                                              // original total number of scores
-        pca.otherFalse = this.otherFalse;                                             // false value for dichotomous data if one of the default values
-        pca.otherTrue = this.otherTrue;                                              // true value for dichotomous data if one of the default values
-        pca.otherDichotomousDataSet = this.otherDichotomousDataSet;                              // = true if user sets an alternative dichotomous pair
-        pca.dichotomous = this.dichotomous.clone();                                         // true if the data in an item is dichotomous
-        pca.dichotomousPercentage = this.dichotomousPercentage.clone();                                // percentage of responses in an item that are dichotomous
-        pca.dichotomousOverall = this.dichotomousOverall;                                   // true if all the data is dichotomous
-        pca.dichotomousCheckDone = this.dichotomousCheckDone;                                 // true if check for dichotomous data performed
-        pca.letterToNumeralSet = this.letterToNumeralSet;                                   // = true if user set the letter to numeral option allowing alphabetic response input
-        pca.ignoreNoResponseRequests = this.ignoreNoResponseRequests;                             // = true - requests for 'no resonse' options are not displayed
-        pca.itemDeletionPercentage = this.itemDeletionPercentage;                                // percentage of no responses allowed within an item before the item is deleted
-        pca.itemDeletionPercentageSet = this.itemDeletionPercentageSet;                            // = true when this percentage is reset
-        pca.personDeletionPercentage = this.personDeletionPercentage;                                // percentage of no responses allowed within a person's responses before the person is deleted
-        pca.personDeletionPercentageSet = this.personDeletionPercentageSet;                          // = true when this percentage is reset
-        pca.replacementOption = this.replacementOption;                                            // option flag for a missing response if deletion not carried out
-        pca.replacementOptionNames = this.replacementOptionNames.clone();
-        pca.replacementOptionSet = this.replacementOptionSet;                                 // = true when replacementOption set
-        pca.allNoResponseOptionsSet = this.allNoResponseOptionsSet;                              // = true when personDeletionPercentageSet, itemDeletionPercentageSet and replacementOptionSet are all true
+        pca.originalNscores = this.originalNscores;                                                 // original total number of scores
+        pca.otherFalse = this.otherFalse;                                                           // false value for dichotomous data if one of the default values
+        pca.otherTrue = this.otherTrue;                                                             // true value for dichotomous data if one of the default values
+        pca.otherDichotomousDataSet = this.otherDichotomousDataSet;                                 // = true if user sets an alternative dichotomous pair
+        pca.dichotomous = Conv.copy(this.dichotomous);                                                 // true if the data in an item is dichotomous
+        pca.dichotomousPercentage = Conv.copy(this.dichotomousPercentage);                             // percentage of responses in an item that are dichotomous
+        pca.dichotomousOverall = this.dichotomousOverall;                                           // true if all the data is dichotomous
+        pca.dichotomousCheckDone = this.dichotomousCheckDone;                                       // true if check for dichotomous data performed
+        pca.letterToNumeralSet = this.letterToNumeralSet;                                           // = true if user set the letter to numeral option allowing alphabetic response input
+        pca.ignoreNoResponseRequests = this.ignoreNoResponseRequests;                               // = true - requests for 'no resonse' options are not displayed
+        pca.itemDeletionPercentage = this.itemDeletionPercentage;                                   // percentage of no responses allowed within an item before the item is deleted
+        pca.itemDeletionPercentageSet = this.itemDeletionPercentageSet;                             // = true when this percentage is reset
+        pca.personDeletionPercentage = this.personDeletionPercentage;                               // percentage of no responses allowed within a person's responses before the person is deleted
+        pca.personDeletionPercentageSet = this.personDeletionPercentageSet;                         // = true when this percentage is reset
+        pca.replacementOption = this.replacementOption;                                             // option flag for a missing response if deletion not carried out
+        pca.replacementOptionNames = Conv.copy(this.replacementOptionNames);
+        pca.replacementOptionSet = this.replacementOptionSet;                                       // = true when replacementOption set
+        pca.allNoResponseOptionsSet = this.allNoResponseOptionsSet;                                 // = true when personDeletionPercentageSet, itemDeletionPercentageSet and replacementOptionSet are all true
 
-        pca.noResponseHandlingSet = this.noResponseHandlingSet;                                // = true when 'no response' handling options are all set
-        pca.nNaN = this.nNaN;                                                         // number of 'no responses' (initially equated to NaN)
-        pca.deletedItems = this.deletedItems.clone();                                        // = true if item corresponding to the deletedItems array index has been deleted, false otherwise
-        pca.nDeletedItems = this.nDeletedItems;                                                // number of deleted items
-        pca.deletedItemsIndices = this.deletedItemsIndices.clone();                                     // indices of the deleted items
-        pca.itemIndices = this.itemIndices.clone();                                             // indices of items in original data before deletions
-        pca.deletedPersons = this.deletedPersons.clone();                                      // = true if person corresponding to the deletedItems array index has been deleted, false otherwise                                                                                   //   person deleted if no response in all items,then deleted irrespective of missing response option choice
-        pca.nDeletedPersons = this.nDeletedPersons;                                              // number of deleted persons
-        pca.deletedPersonsIndices = this.deletedPersonsIndices.clone();                                   // indices of the deleted persons
-        pca.personIndices = this.personIndices.clone();                                           // indices of persons in original data before deletions
-        pca.nReplacements = this.nReplacements;                                                // number of 'no response' replacements
-        pca.replacementIndices = replacementIndices.clone();                                   // indices of 'no response' replacements
+        pca.noResponseHandlingSet = this.noResponseHandlingSet;                                     // = true when 'no response' handling options are all set
+        pca.nNaN = this.nNaN;                                                                       // number of 'no responses' (initially equated to NaN)
+        pca.deletedItems = Conv.copy(this.deletedItems);                                               // = true if item corresponding to the deletedItems array index has been deleted, false otherwise
+        pca.nDeletedItems = this.nDeletedItems;                                                     // number of deleted items
+        pca.deletedItemsIndices = Conv.copy(this.deletedItemsIndices);                                 // indices of the deleted items
+        pca.itemIndices = Conv.copy(this.itemIndices);                                                 // indices of items in original data before deletions
+        pca.deletedPersons = Conv.copy(this.deletedPersons);                                           // = true if person corresponding to the deletedItems array index has been deleted, false otherwise                                                                                   //   person deleted if no response in all items,then deleted irrespective of missing response option choice
+        pca.nDeletedPersons = this.nDeletedPersons;                                                 // number of deleted persons
+        pca.deletedPersonsIndices = Conv.copy(this.deletedPersonsIndices);                             // indices of the deleted persons
+        pca.personIndices = Conv.copy(this.personIndices);                                             // indices of persons in original data before deletions
+        pca.nReplacements = this.nReplacements;                                                     // number of 'no response' replacements
+        pca.replacementIndices = Conv.copy(replacementIndices);                                        // indices of 'no response' replacements
 
         pca.nFactorOption = this.nFactorOption;
         if(this.dataEntered){
-            pca.dataPreprocessed = false;                                     // = true when scores have been preprocessed
+            pca.dataPreprocessed = false;                                                           // = true when scores have been preprocessed
             pca.preprocessData();
         }
 
@@ -4725,66 +5088,65 @@ public class Scores{
         cr.fileExtensions = this.fileExtensions;
         cr.fileNumberingSet = this.fileNumberingSet;
 
-        cr.originalDataType = this.originalDataType;                                            // - String[][]  (including read from file);
-        cr.originalDataOrder = this.originalDataOrder;                                           // - matrix columns = responses of a person
-        cr.originalData = this.originalData;                                           // Original data as entered
-        cr.scores0 = this.scores0.clone();                                             // individual scores -  after any 'no response' deletions or replacements
-        cr.originalScores0 = this.originalScores0.clone();                                     // scores0 before any 'no response' deletions or replacements
-        cr.standardizedScores0 = this.standardizedScores0.clone();                                 // standardized scores0
-        cr.scores1 = this.scores1.clone();                                             // individual scores -  after any 'no response' deletions or replacements
-        cr.originalScores1 = this.originalScores1.clone();                                     // scores1 before any 'no response' deletions or replacements
-        cr.standardizedScores1 = this.standardizedScores1.clone();                                 // standardized scores1
-        cr.dataEntered = this.dataEntered;                                          // = true when scores entered
-        cr.nItems = this.nItems;                                                       // number of items, after any deletions
-        cr.originalNitems = this.originalNitems;                                               // original number of items
-        cr.itemNames = this.itemNames.clone();                                            // names of the items
-        cr.originalItemNames = this.originalItemNames.clone();                                    // list of item names before any deletions
-        cr.itemNamesSet = this.itemNamesSet;                                         // = true when item names entered
-        cr.nPersons = this.nPersons;                                                     // number of persons, after any deletions
-        cr.originalNpersons = this.originalNpersons;                                             // original number of persons
+        cr.originalDataType = this.originalDataType;                                                // - String[][]  (including read from file);
+        cr.originalDataOrder = this.originalDataOrder;                                              // - matrix columns = responses of a person
+        cr.originalData = this.originalData;                                                        // Original data as entered
+        cr.scores0 = Conv.copy(this.scores0);                                                          // individual scores -  after any 'no response' deletions or replacements
+        cr.originalScores0 = Conv.copy(this.originalScores0);                                          // scores0 before any 'no response' deletions or replacements
+        cr.standardizedScores0 = Conv.copy(this.standardizedScores0);                                  // standardized scores0
+        cr.scores1 = Conv.copy(this.scores1);                                                          // individual scores -  after any 'no response' deletions or replacements
+        cr.originalScores1 = Conv.copy(this.originalScores1);                                          // scores1 before any 'no response' deletions or replacements
+        cr.standardizedScores1 = Conv.copy(this.standardizedScores1);                                  // standardized scores1
+        cr.dataEntered = this.dataEntered;                                                          // = true when scores entered
+        cr.nItems = this.nItems;                                                                    // number of items, after any deletions
+        cr.originalNitems = this.originalNitems;                                                    // original number of items
+        cr.itemNames = Conv.copy(this.itemNames);                                                      // names of the items
+        cr.originalItemNames = Conv.copy(this.originalItemNames);                                      // list of item names before any deletions
+        cr.itemNamesSet = this.itemNamesSet;                                                        // = true when item names entered
+        cr.nPersons = this.nPersons;                                                                // number of persons, after any deletions
+        cr.originalNpersons = this.originalNpersons;                                                // original number of persons
         cr.nScores = this.nScores;
-        cr.originalNscores = this.originalNscores;                                              // original total number of scores
-        cr.otherFalse = this.otherFalse;                                             // false value for dichotomous data if one of the default values
-        cr.otherTrue = this.otherTrue;                                              // true value for dichotomous data if one of the default values
-        cr.otherDichotomousDataSet = this.otherDichotomousDataSet;                              // = true if user sets an alternative dichotomous pair
-        cr.dichotomous = this.dichotomous.clone();                                         // true if the data in an item is dichotomous
-        cr.dichotomousPercentage = this.dichotomousPercentage.clone();                                // percentage of responses in an item that are dichotomous
-        cr.dichotomousOverall = this.dichotomousOverall;                                   // true if all the data is dichotomous
-        cr.dichotomousCheckDone = this.dichotomousCheckDone;                                 // true if check for dichotomous data performed
-        cr.letterToNumeralSet = this.letterToNumeralSet;                                   // = true if user set the letter to numeral option allowing alphabetic response input
-        cr.ignoreNoResponseRequests = this.ignoreNoResponseRequests;                             // = true - requests for 'no resonse' options are not displayed
-        cr.itemDeletionPercentage = this.itemDeletionPercentage;                                // percentage of no responses allowed within an item before the item is deleted
-        cr.itemDeletionPercentageSet = this.itemDeletionPercentageSet;                            // = true when this percentage is reset
+        cr.originalNscores = this.originalNscores;                                                  // original total number of scores
+        cr.otherFalse = this.otherFalse;                                                            // false value for dichotomous data if one of the default values
+        cr.otherTrue = this.otherTrue;                                                              // true value for dichotomous data if one of the default values
+        cr.otherDichotomousDataSet = this.otherDichotomousDataSet;                                  // = true if user sets an alternative dichotomous pair
+        cr.dichotomous = Conv.copy(this.dichotomous);                                                  // true if the data in an item is dichotomous
+        cr.dichotomousPercentage = Conv.copy(this.dichotomousPercentage);                              // percentage of responses in an item that are dichotomous
+        cr.dichotomousOverall = this.dichotomousOverall;                                            // true if all the data is dichotomous
+        cr.dichotomousCheckDone = this.dichotomousCheckDone;                                        // true if check for dichotomous data performed
+        cr.letterToNumeralSet = this.letterToNumeralSet;                                            // = true if user set the letter to numeral option allowing alphabetic response input
+        cr.ignoreNoResponseRequests = this.ignoreNoResponseRequests;                                // = true - requests for 'no resonse' options are not displayed
+        cr.itemDeletionPercentage = this.itemDeletionPercentage;                                    // percentage of no responses allowed within an item before the item is deleted
+        cr.itemDeletionPercentageSet = this.itemDeletionPercentageSet;                              // = true when this percentage is reset
         cr.personDeletionPercentage = this.personDeletionPercentage;                                // percentage of no responses allowed within a person's responses before the person is deleted
         cr.personDeletionPercentageSet = this.personDeletionPercentageSet;                          // = true when this percentage is reset
-        cr.replacementOption = this.replacementOption;                                            // option flag for a missing response if deletion not carried out
-        cr.replacementOptionNames = this.replacementOptionNames.clone();
-        cr.replacementOptionSet = this.replacementOptionSet;                                 // = true when replacementOption set
-        cr.allNoResponseOptionsSet = this.allNoResponseOptionsSet;                              // = true when personDeletionPercentageSet, itemDeletionPercentageSet and replacementOptionSet are all true
+        cr.replacementOption = this.replacementOption;                                              // option flag for a missing response if deletion not carried out
+        cr.replacementOptionNames = Conv.copy(this.replacementOptionNames);
+        cr.replacementOptionSet = this.replacementOptionSet;                                        // = true when replacementOption set
+        cr.allNoResponseOptionsSet = this.allNoResponseOptionsSet;                                  // = true when personDeletionPercentageSet, itemDeletionPercentageSet and replacementOptionSet are all true
 
-        cr.noResponseHandlingSet = this.noResponseHandlingSet;                                // = true when 'no response' handling options are all set
-        cr.nNaN = this.nNaN;                                                         // number of 'no responses' (initially equated to NaN)
-        cr.deletedItems = this.deletedItems.clone();                                        // = true if item corresponding to the deletedItems array index has been deleted, false otherwise
-        cr.nDeletedItems = this.nDeletedItems;                                                // number of deleted items
-        cr.deletedItemsIndices = this.deletedItemsIndices.clone();                                     // indices of the deleted items
-        cr.itemIndices = this.itemIndices.clone();                                             // indices of items in original data before deletions
-        cr.deletedPersons = this.deletedPersons.clone();                                      // = true if person corresponding to the deletedItems array index has been deleted, false otherwise                                                                                   //   person deleted if no response in all items,then deleted irrespective of missing response option choice
-        cr.nDeletedPersons = this.nDeletedPersons;                                              // number of deleted persons
-        cr.deletedPersonsIndices = this.deletedPersonsIndices.clone();                                   // indices of the deleted persons
-        cr.personIndices = this.personIndices.clone();                                           // indices of persons in original data before deletions
-        cr.nReplacements = this.nReplacements;                                                // number of 'no response' replacements
-        cr.replacementIndices = replacementIndices.clone();                                   // indices of 'no response' replacements
+        cr.noResponseHandlingSet = this.noResponseHandlingSet;                                      // = true when 'no response' handling options are all set
+        cr.nNaN = this.nNaN;                                                                        // number of 'no responses' (initially equated to NaN)
+        cr.deletedItems = Conv.copy(this.deletedItems);                                                // = true if item corresponding to the deletedItems array index has been deleted, false otherwise
+        cr.nDeletedItems = this.nDeletedItems;                                                      // number of deleted items
+        cr.deletedItemsIndices = Conv.copy(this.deletedItemsIndices);                                  // indices of the deleted items
+        cr.itemIndices = Conv.copy(this.itemIndices);                                                  // indices of items in original data before deletions
+        cr.deletedPersons = Conv.copy(this.deletedPersons);                                            // = true if person corresponding to the deletedItems array index has been deleted, false otherwise                                                                                   //   person deleted if no response in all items,then deleted irrespective of missing response option choice
+        cr.nDeletedPersons = this.nDeletedPersons;                                                  // number of deleted persons
+        cr.deletedPersonsIndices = Conv.copy(this.deletedPersonsIndices);                              // indices of the deleted persons
+        cr.personIndices = Conv.copy(this.personIndices);                                              // indices of persons in original data before deletions
+        cr.nReplacements = this.nReplacements;                                                      // number of 'no response' replacements
+        cr.replacementIndices = Conv.copy(replacementIndices);                                         // indices of 'no response' replacements
 
         cr.nFactorOption = this.nFactorOption;
         if(this.dataEntered){
-            cr.dataPreprocessed = false;                                     // = true when scores have been preprocessed
+            cr.dataPreprocessed = false;                                                            // = true when scores have been preprocessed
             cr.preprocessData();
         }
 
         return cr;
     }
 }
-
 
 
 

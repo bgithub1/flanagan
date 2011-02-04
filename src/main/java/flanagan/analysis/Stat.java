@@ -15,14 +15,14 @@
 *            2-4 August 2008,  20 August 2008, 5-10 September 2008, 19 September 2008,
 *            28-30 September 2008 (probability Plot moved to separate class, ProbabilityPlot)
 *            4-5 October 2008,  8-13 December 2008, 14 June 2009, 13-23 October 2009,
-*            8 February 2010, 18-25 May 2010
+*            8 February 2010, 18-25 May 2010, 2 November 2010, 4 December 2010, 19-25 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/Stat.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2002 - 2010 Michael Thomas Flanagan
+*   Copyright (c) 2002 - 2011 Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *
@@ -108,6 +108,9 @@ public class Stat extends ArrayMaths{
 
         // A small number close to the smallest representable floating point number
         public static final double FPMIN = 1e-300;
+
+        private static boolean igSupress = false;                               // if true error messages in incompleteGammaSeries
+                                                                                //  and incompleteGammaFract supressed
 
 
         // PRIVATE MEMBERS FOR USE IN GAMMA FUNCTION METHODS AND HISTOGRAM CONSTRUCTION METHODS
@@ -3735,7 +3738,7 @@ public class Stat extends ArrayMaths{
         // returns weight w
         // litte w to one over little w squared if uncertainties used
         private static double[] invertAndSquare(double[] ww){
-            double[] weight = ww.clone();
+            double[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3746,7 +3749,7 @@ public class Stat extends ArrayMaths{
         }
 
         private static float[] invertAndSquare(float[] ww){
-            float[] weight = ww.clone();
+            float[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3757,7 +3760,7 @@ public class Stat extends ArrayMaths{
         }
 
         private static Complex[] invertAndSquare(Complex[] ww){
-            Complex[] weight = ww.clone();
+            Complex[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3768,7 +3771,7 @@ public class Stat extends ArrayMaths{
         }
 
         private static BigDecimal[] invertAndSquare(BigDecimal[] ww){
-            BigDecimal[] weight = ww.clone();
+            BigDecimal[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3816,7 +3819,7 @@ public class Stat extends ArrayMaths{
 
         // Calculation of the effective sample number (double)
         public static double effectiveSampleNumber(double[] ww){
-            double[] weight = ww.clone();
+            double[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3841,7 +3844,7 @@ public class Stat extends ArrayMaths{
 
         // Calculation of the sample number (float)
         public static float effectiveSampleNumber(float[] ww){
-            float[] weight = ww.clone();
+            float[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3866,7 +3869,7 @@ public class Stat extends ArrayMaths{
 
         // Calculation of the sample number (Complex)
         public static Complex effectiveSampleNumber(Complex[] ww){
-            Complex[] weight = ww.clone();
+            Complex[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3891,7 +3894,7 @@ public class Stat extends ArrayMaths{
 
         // Calculation of the sample number (Complex  - Conjugate formula)
         public static double effectiveSampleNumberConjugateCalcn(Complex[] ww){
-            Complex[] weight = ww.clone();
+            Complex[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -3916,7 +3919,7 @@ public class Stat extends ArrayMaths{
 
         // Calculation of the sample number (BigDecimal)
         public static BigDecimal effectiveSampleNumber(BigDecimal[] ww){
-            BigDecimal[] weight = ww.clone();
+            BigDecimal[] weight = Conv.copy(ww);
             if(Stat.weightingOptionS){
                 ArrayMaths am = new ArrayMaths(ww);
                 am = am.pow(2);
@@ -4052,7 +4055,7 @@ public class Stat extends ArrayMaths{
         public static double mean(double[] aa, double[] ww){
                 int n = aa.length;
                 if(n!=ww.length)throw new IllegalArgumentException("length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
-                double[] weight = ww.clone();
+                double[] weight = Conv.copy(ww);
                 if(Stat.weightingOptionS){
                     ArrayMaths am = new ArrayMaths(ww);
                     am = am.pow(2);
@@ -4072,7 +4075,7 @@ public class Stat extends ArrayMaths{
         public static float mean(float[] aa, float[] ww){
                 int n = aa.length;
                 if(n!=ww.length)throw new IllegalArgumentException("length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
-                float[] weight = ww.clone();
+                float[] weight = Conv.copy(ww);
                 if(Stat.weightingOptionS){
                     ArrayMaths am = new ArrayMaths(ww);
                     am = am.pow(2);
@@ -4093,7 +4096,7 @@ public class Stat extends ArrayMaths{
         public static Complex mean(Complex[] aa, Complex[] ww){
                 int n = aa.length;
                 if(n!=ww.length)throw new IllegalArgumentException("length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
-                Complex[] weight = ww.clone();
+                Complex[] weight = Conv.copy(ww);
                 if(Stat.weightingOptionS){
                     ArrayMaths am = new ArrayMaths(ww);
                     am = am.pow(2);
@@ -4113,7 +4116,7 @@ public class Stat extends ArrayMaths{
         public static BigDecimal mean(BigDecimal[] aa, BigDecimal[] ww){
                 int n = aa.length;
                 if(n!=ww.length)throw new IllegalArgumentException("length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
-                BigDecimal[] weight = ww.clone();
+                BigDecimal[] weight = Conv.copy(ww);
                 if(Stat.weightingOptionS){
                     ArrayMaths am = new ArrayMaths(ww);
                     am = am.pow(2);
@@ -5450,10 +5453,16 @@ public class Stat extends ArrayMaths{
             double sd0 = Stat.standardDeviation(aa);
             int n = aa.length;
             double[] bb = new double[n];
-            for(int i=0; i<n; i++){
-                bb[i] = (aa[i] - mean0)/sd0;
+            if(sd0==0.0){
+                for(int i=0; i<n; i++){
+                    bb[i] = 1.0;
+                }
             }
-
+            else{
+                for(int i=0; i<n; i++){
+                    bb[i] = (aa[i] - mean0)/sd0;
+                }
+            }
             return bb;
         }
 
@@ -5467,10 +5476,16 @@ public class Stat extends ArrayMaths{
             float sd0 = Stat.standardDeviation(aa);
             int n = aa.length;
             float[] bb = new float[n];
-            for(int i=0; i<n; i++){
-                bb[i] = (aa[i] - mean0)/sd0;
+            if(sd0==0.0){
+                for(int i=0; i<n; i++){
+                    bb[i] = 1.0F;
+                }
             }
-
+            else{
+                for(int i=0; i<n; i++){
+                    bb[i] = (aa[i] - mean0)/sd0;
+                }
+            }
             return bb;
         }
 
@@ -5485,10 +5500,16 @@ public class Stat extends ArrayMaths{
             double sd0 = Stat.standardDeviation(aa);
             int n = aa.length;
             double[] bb = new double[n];
-            for(int i=0; i<n; i++){
-                bb[i] = (aa[i] - mean0)/sd0;
+            if(sd0==0.0){
+                for(int i=0; i<n; i++){
+                    bb[i] = 1.0;
+                }
             }
-
+            else{
+                for(int i=0; i<n; i++){
+                    bb[i] = ((double)aa[i] - mean0)/sd0;
+                }
+            }
             return bb;
         }
 
@@ -5503,10 +5524,16 @@ public class Stat extends ArrayMaths{
             double sd0 = Stat.standardDeviation(aa);
             int n = aa.length;
             double[] bb = new double[n];
-            for(int i=0; i<n; i++){
-                bb[i] = (aa[i] - mean0)/sd0;
+            if(sd0==0.0){
+                for(int i=0; i<n; i++){
+                    bb[i] = 1.0;
+                }
             }
-
+            else{
+                for(int i=0; i<n; i++){
+                    bb[i] = ((double)aa[i] - mean0)/sd0;
+                }
+            }
             return bb;
         }
 
@@ -5521,10 +5548,16 @@ public class Stat extends ArrayMaths{
             double sd0 = Stat.standardDeviation(aa);
             int n = aa.length;
             double[] bb = new double[n];
-            for(int i=0; i<n; i++){
-                bb[i] = (aa[i].doubleValue() - mean0)/sd0;
+            if(sd0==0.0){
+                for(int i=0; i<n; i++){
+                    bb[i] = 1.0;
+                }
             }
-
+            else{
+                for(int i=0; i<n; i++){
+                    bb[i] = (aa[i].doubleValue() - mean0)/sd0;
+                }
+            }
             return bb;
         }
 
@@ -5749,7 +5782,9 @@ public class Stat extends ArrayMaths{
                 double median25 = Stat.median(first);
                 double median75 = Stat.median(last);
 
-                return (median25 - 2.0*median50 + median75)/(median75 - median25);
+                double ret = (median25 - 2.0*median50 + median75)/(median75 - median25);
+                if(Fmath.isNaN(ret))ret = 1.0;
+                return ret;
         }
 
         // Quartile skewness of a 1D array of float
@@ -5772,7 +5807,9 @@ public class Stat extends ArrayMaths{
                 float median25 = Stat.median(first);
                 float median75 = Stat.median(last);
 
-                return (median25 - 2.0F*median50 + median75)/(median75 - median25);
+                float ret = (median25 - 2.0F*median50 + median75)/(median75 - median25);
+                if(Fmath.isNaN(ret))ret = 1.0F;
+                return ret;
         }
 
 
@@ -5798,6 +5835,7 @@ public class Stat extends ArrayMaths{
                 BigDecimal ret1 = (median25.subtract(median50.multiply(new BigDecimal(2.0)))).add(median75);
                 BigDecimal ret2 = median75.subtract(median25);
                 BigDecimal ret = ret1.divide(ret2,BigDecimal.ROUND_HALF_UP);
+                if(Fmath.isNaN(ret.doubleValue()))ret = new BigDecimal(1.0D);
                 first = null;
                 last = null;
                 median25 = null;
@@ -5836,7 +5874,9 @@ public class Stat extends ArrayMaths{
                 double median25 = Stat.median(first);
                 double median75 = Stat.median(last);
 
-                return (median25 - 2.0*median50 + median75)/(median75 - median25);
+                double ret = (median25 - 2.0*median50 + median75)/(median75 - median25);
+                if(Fmath.isNaN(ret))ret = 1.0;
+                return ret;
         }
 
         // Quartile skewness of a 1D array of int
@@ -5859,7 +5899,9 @@ public class Stat extends ArrayMaths{
                 double median25 = Stat.median(first);
                 double median75 = Stat.median(last);
 
-                return (median25 - 2.0*median50 + median75)/(median75 - median25);
+                double ret = (median25 - 2.0*median50 + median75)/(median75 - median25);
+                if(Fmath.isNaN(ret))ret = 1.0;
+                return ret;
         }
 
 
@@ -5876,8 +5918,11 @@ public class Stat extends ArrayMaths{
                 for(int i=0; i<n; i++){
                         sum+=Math.pow((aa[i]-mean), 4);
                 }
+
                 sum = sum/denom;
-                return sum/Fmath.square(Stat.variance(aa));
+                double ret = sum/Fmath.square(Stat.variance(aa));
+                if(Fmath.isNaN(ret))ret = 2.0/denom;
+                return ret;
         }
 
         public static double curtosis(double[] aa){
@@ -5912,7 +5957,9 @@ public class Stat extends ArrayMaths{
                         sum+=Math.pow((aa[i]-mean), 4);
                 }
                 sum = sum/denom;
-                return sum/(Fmath.square(Stat.variance(aa)));
+                float ret = sum/Fmath.square(Stat.variance(aa));
+                if(Fmath.isNaN(ret))ret = 2.0F/denom;
+                return ret;
         }
 
         public static float curtosis(float[] aa){
@@ -5978,7 +6025,12 @@ public class Stat extends ArrayMaths{
                 }
                 sum = sum.divide(new BigDecimal(denom), BigDecimal.ROUND_HALF_UP);
                 mean = Stat.variance(aa);
-                sum = sum.divide(mean.multiply(mean), BigDecimal.ROUND_HALF_UP);
+                if(mean.doubleValue()==0.0){
+                    sum = new BigDecimal(2.0/denom);
+                }
+                else{
+                    sum = sum.divide(mean.multiply(mean), BigDecimal.ROUND_HALF_UP);
+                }
                 mean = null;
                 return sum;
         }
@@ -6016,7 +6068,9 @@ public class Stat extends ArrayMaths{
                         sum+=Math.pow(((double)aa[i]-mean), 4);
                 }
                 sum = sum/denom;
-                return sum/Fmath.square(Stat.variance(aa));
+                double ret = sum/Fmath.square(Stat.variance(aa));
+                if(Fmath.isNaN(ret))ret = 2.0/denom;
+                return ret;
         }
 
         public static double curtosis(long[] aa){
@@ -6052,7 +6106,9 @@ public class Stat extends ArrayMaths{
                         sum+=Math.pow((aa[i]-mean), 4);
                 }
                 sum = sum/denom;
-                return sum/Fmath.square(Stat.variance(aa));
+                double ret = sum/Fmath.square(Stat.variance(aa));
+                if(Fmath.isNaN(ret))ret = 2.0/denom;
+                return ret;
         }
 
         public static double curtosis(int[] aa){
@@ -6091,7 +6147,8 @@ public class Stat extends ArrayMaths{
                 if(Stat.nFactorOptionS) ret = sum.divide(new BigDecimal((double)n), BigDecimal.ROUND_HALF_UP);
                 sum = null;
                 mean = null;
-                return ret;        }
+                return ret;
+        }
 
 
         // Variance of a 1D array of BigIntegers, aa
@@ -7654,14 +7711,9 @@ public class Stat extends ArrayMaths{
                 double fg = 0.0D;
 
                 if(x>=0.0){
-                        if(x>=1.0D && x-(int)x==0.0D){
-                                fg = Stat.factorial(x)/x;
-                        }
-                        else{
-                                first = Math.pow(first, x + 0.5)*Math.exp(-first);
-                                for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
-                                fg = first*Math.sqrt(2.0*Math.PI)*second/x;
-                        }
+                        first = Math.pow(first, x + 0.5)*Math.exp(-first);
+                        for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
+                        fg = first*Math.sqrt(2.0*Math.PI)*second/x;
                 }
                 else{
                          fg = -Math.PI/(x*Stat.gamma(-x)*Math.sin(Math.PI*x));
@@ -7680,14 +7732,9 @@ public class Stat extends ArrayMaths{
                 double fg = 0.0D;
 
                 if(x>=0.0){
-                        if(x>=1.0D && x-(int)x==0.0D){
-                                fg = Stat.factorial(x)/x;
-                        }
-                        else{
-                                first = Math.pow(first, x + 0.5)*Math.exp(-first);
-                                for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
-                                fg = first*Math.sqrt(2.0*Math.PI)*second/x;
-                        }
+                        first = Math.pow(first, x + 0.5)*Math.exp(-first);
+                        for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
+                        fg = first*Math.sqrt(2.0*Math.PI)*second/x;
                 }
                 else{
                          fg = -Math.PI/(x*Stat.gamma(-x)*Math.sin(Math.PI*x));
@@ -7729,14 +7776,9 @@ public class Stat extends ArrayMaths{
                 double second = lgfCoeff[0];
 
                 if(x>=0.0){
-                        if(x>=1.0 && x-(int)x==0.0){
-                                fg = Stat.logFactorial(x)-Math.log(x);
-                        }
-                        else{
-                                first -= (x + 0.5)*Math.log(first);
-                                for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
-                                fg = Math.log(Math.sqrt(2.0*Math.PI)*second/x) - first;
-                        }
+                        first -= (x + 0.5)*Math.log(first);
+                        for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
+                        fg = Math.log(Math.sqrt(2.0*Math.PI)*second/x) - first;
                 }
                 else{
                         fg = Math.PI/(Stat.gamma(1.0D-x)*Math.sin(Math.PI*x));
@@ -7763,14 +7805,9 @@ public class Stat extends ArrayMaths{
                 double second = lgfCoeff[0];
 
                 if(x>=0.0){
-                        if(x>=1.0 && x-(int)x==0.0){
-                                fg = Stat.logFactorial(x)-Math.log(x);
-                        }
-                        else{
-                                first -= (x + 0.5)*Math.log(first);
-                                for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
-                                fg = Math.log(Math.sqrt(2.0*Math.PI)*second/x) - first;
-                        }
+                        first -= (x + 0.5)*Math.log(first);
+                        for(int i=1; i<=lgfN; i++)second += lgfCoeff[i]/++xcopy;
+                        fg = Math.log(Math.sqrt(2.0*Math.PI)*second/x) - first;
                 }
                 else{
                         fg = Math.PI/(Stat.gamma(1.0D-x)*Math.sin(Math.PI*x));
@@ -7907,6 +7944,8 @@ public class Stat extends ArrayMaths{
         // Regularised Incomplete Gamma Function P(a,x) = integral from zero to x of (exp(-t)t^(a-1))dt
         public static double regularisedGammaFunction(double a, double x){
                 if(a<0.0D  || x<0.0D)throw new IllegalArgumentException("\nFunction defined only for a >= 0 and x>=0");
+
+                Stat.igSupress = true;
                 double igf = 0.0D;
 
                 if(x!=0){
@@ -7918,7 +7957,10 @@ public class Stat extends ArrayMaths{
                         // Continued fraction representation
                         igf = incompleteGammaFract(a, x);
                     }
+                    if(igf!=igf)igf = 1.0 - Stat.crigfGaussQuad(a, x);
                 }
+                if(igf<0.0)igf = 0.0;
+                Stat.igSupress = false;
                 return igf;
         }
 
@@ -7942,24 +7984,29 @@ public class Stat extends ArrayMaths{
         // Complementary Regularised Incomplete Gamma Function Q(a,x) = 1 - P(a,x) = 1 - integral from zero to x of (exp(-t)t^(a-1))dt
         public static double complementaryRegularisedGammaFunction(double a, double x){
                 if(a<0.0D  || x<0.0D)throw new IllegalArgumentException("\nFunction defined only for a >= 0 and x>=0");
+
+                Stat.igSupress = true;
                 double igf = 1.0D;
 
                 if(x!=0.0D){
                         if(x==1.0D/0.0D)
                         {
-                                igf=1.0D;
+                                igf=0.0D;
                         }
                         else{
                                 if(x < a+1.0D){
                                         // Series representation
-                                        igf = 1.0D - incompleteGammaSer(a, x);
+                                        igf = 1.0 - Stat.incompleteGammaSer(a, x);
                                 }
                                 else{
                                         // Continued fraction representation
-                                        igf = 1.0D - incompleteGammaFract(a, x);
+                                        igf = 1.0 - Stat.incompleteGammaFract(a, x);
                                 }
                         }
+                        if(igf!=igf)igf = Stat.crigfGaussQuad(a, x);
                 }
+                if(igf>1.0)igf = 1.0;
+                Stat.igSupress = false;
                 return igf;
         }
 
@@ -8009,8 +8056,12 @@ public class Stat extends ArrayMaths{
                         }
                         if(i>=Stat.igfiter){
                                 check=false;
-                                igf = sum*Math.exp(-x+acopy*Math.log(x)- loggamma);
-                                System.out.println("\nMaximum number of iterations were exceeded in Stat.incompleteGammaSer().\nCurrent value returned.\nIncrement = "+String.valueOf(incr)+".\nSum = "+String.valueOf(sum)+".\nTolerance =  "+String.valueOf(igfeps));
+                                igf = Double.NaN;
+                                if(!Stat.igSupress){
+                                    System.out.println("\nMaximum number of iterations were exceeded in Stat.incompleteGammaSer().");
+                                    System.out.println("NaN returned.\nIncrement = "+String.valueOf(incr)+".");
+                                    System.out.println("Sum = "+String.valueOf(sum)+".\nTolerance =  "+String.valueOf(igfeps));
+                                }
                         }
                     }
                 }
@@ -8062,14 +8113,66 @@ public class Stat extends ArrayMaths{
                         prod *= incr;
                         if(Math.abs(incr - 1.0D) < igfeps)check = false;
                         if(i>=Stat.igfiter){
-                                check=false;
-                                System.out.println("\nMaximum number of iterations were exceeded in Stat.incompleteGammaFract().\nCurrent value returned.\nIncrement - 1 = "+String.valueOf(incr-1)+".\nTolerance =  "+String.valueOf(igfeps));
+                            check=false;
+                            igf = Double.NaN;
+                            if(!Stat.igSupress){
+                                System.out.println("\nMaximum number of iterations were exceeded in Stat.incompleteGammaFract().");
+                                System.out.println("NaN returned.\nIncrement - 1 = "+String.valueOf(incr-1)+".");
+                                System.out.println("Tolerance =  "+String.valueOf(igfeps));
+                            }
                         }
                     }
                     igf = 1.0D - Math.exp(-x+a*Math.log(x)-loggamma)*prod;
                 }
 
                 return igf;
+        }
+
+        // Guassian quadrature estimation of the complementary regularised incomplete gamma function
+        private static double crigfGaussQuad(double a, double x){
+            double sum = 0.0;
+
+            // set increment details
+            double upper = 100.0*a;
+            double range = upper - x;
+            double incr = 0;
+            if(upper>x && range >100){
+                incr = range/1000;
+            }
+            else{
+                upper = x + 100.0;
+                range = 100.0;
+                incr = 0.1;
+            }
+            int nIncr = (int)Math.round(range/incr);
+            incr = range/nIncr;
+
+            // Instantiate integration function
+            CrigFunct f1 = new CrigFunct();
+            f1.setA(a);
+            f1.setB(Stat.logGammaFunction(a));
+
+            // Instantiate Integration
+            Integration intgn1 = new Integration(f1);
+            double xx = x;
+            double yy = x + incr;
+            intgn1.setLimits(xx, yy);
+
+            // Perform quadrature
+            sum = intgn1.gaussQuad(64);
+            boolean test2 = true;
+            for(int i=1; i<nIncr; i++){
+                xx = yy;
+                yy = xx + incr;
+                intgn1.setLimits(xx, yy);
+                sum += intgn1.gaussQuad(64);
+            }
+            return sum;
+        }
+
+        // Suppress error message in incomplete gamma series and incomplete gamma fraction methods supressed
+        public static void igSupress(){
+            Stat.igSupress = true;
         }
 
         // Reset the maximum number of iterations allowed in the calculation of the incomplete gamma functions
@@ -8385,34 +8488,91 @@ public class Stat extends ArrayMaths{
         }
 
         // Erlang B equation
+        // Integer or non-integer number of servers
         // returns the probablility that a customer will be rejected due to lack of resources
         // totalTraffic:    total traffic in Erlangs
         // totalResouces:   total number of resources in the system
-        // recursive calculation
         public static double erlangBprobability(double totalTraffic, double totalResources){
-            if(totalResources<1)throw new IllegalArgumentException("Total resources, " + totalResources + ", must be an integer greater than or equal to 1");
-            if(!Fmath.isInteger(totalResources))throw new IllegalArgumentException("Total resources, " + totalResources + ", must be, arithmetically, an integer");
+            if(totalTraffic<0)throw new IllegalArgumentException("Total traffic, " + totalTraffic + ", must be greater than or equal to zero");
+            if(totalResources<0)throw new IllegalArgumentException("Total resources, " + totalResources + ", must be greater than or equal to zero");
+
             double prob = 0.0D;
-            double iCount = 1.0D;
-            if(totalTraffic>0.0D){
-                prob = 1.0D;
-                double hold = 0.0;
-                while(iCount<=totalResources){
-                    hold = prob*totalTraffic;
-                    prob = hold/(iCount + hold);
-                    iCount += 1.0;
+            if(totalResources==0.0D){
+                prob = 1.0;
+            }
+            else{
+                if(totalTraffic==0.0D){
+                    prob = 0.0;
+                }
+                else{
+                    if(Fmath.isInteger(totalResources)){
+                        double iCount = 1.0D;
+                        prob = 1.0D;
+                        double hold = 0.0D;
+                        while(iCount<=totalResources){
+                            hold = prob*totalTraffic;
+                            prob = hold/(iCount + hold);
+                            iCount += 1.0D;
+                        }
+                    }
+                    else{
+                        prob = Stat.erlangBprobabilityNIR(totalTraffic, totalResources);
+                    }
                 }
             }
             return prob;
         }
 
-
+        // Erlang B equation
+        // Integer number of servers
+        // returns the probablility that a customer will be rejected due to lack of resources
+        // totalTraffic:    total traffic in Erlangs
+        // totalResouces:   total number of resources in the system
         public static double erlangBprobability(double totalTraffic, long totalResources){
             return erlangBprobability(totalTraffic, (double)totalResources);
         }
 
+
+        // Erlang B equation
+        // Integer number of servers
+        // returns the probablility that a customer will be rejected due to lack of resources
+        // totalTraffic:    total traffic in Erlangs
+        // totalResouces:   total number of resources in the system
         public static double erlangBprobability(double totalTraffic, int totalResources){
             return erlangBprobability(totalTraffic, (double)totalResources);
+        }
+
+        // Erlang B equation
+        // Non-Integer number of servers
+        // returns the probablility that a customer will be rejected due to lack of resources
+        // totalTraffic:    total traffic in Erlangs
+        // totalResouces:   total number of resources in the system
+        public static double erlangBprobabilityNIR(double totalTraffic, double totalResources){
+
+            double prob = 0.0D; // blocking probability
+
+            // numerator
+            double lognumer =  totalResources*Math.log(totalTraffic) - totalTraffic;
+            // denominator (incomplete Gamma Function)
+            double oneplustr = 1.0D + totalResources;
+            double crigf = Stat.complementaryRegularisedGammaFunction(oneplustr, totalTraffic);
+            if(crigf==0.0){
+                prob = 1.0;
+            }
+            else{
+                double logdenom = Math.log(crigf) + Stat.logGammaFunction(oneplustr);
+                prob = Math.exp(lognumer - logdenom);
+            }
+            return prob;
+        }
+
+        // Non-Integer number of servers
+        // returns the probablility that a customer will be rejected due to lack of resources
+        // totalTraffic:    total traffic in Erlangs
+        // totalResouces:   total number of resources in the system
+        // Retained for compatibility
+        public static double erlangBprobabilityNonIntRes(double totalTraffic, double totalResources){
+            return Stat.erlangBprobability(totalTraffic, totalResources);
         }
 
         // Erlang B equation
@@ -8420,8 +8580,6 @@ public class Stat extends ArrayMaths{
         // blockingProbability:    probablility that a customer will be rejected due to lack of resources
         // totalResouces:   total number of resources in the system
         public static double erlangBload(double blockingProbability, double totalResources){
-            if(totalResources<1)throw new IllegalArgumentException("Total resources, " + totalResources + ", must be an integer greater than or equal to 1");
-            if(!Fmath.isInteger(totalResources))throw new IllegalArgumentException("Total resources, " + totalResources + ", must be, arithmetically, an integer");
 
             // Create instance of the class holding the Erlang B equation
             ErlangBfunct eBfunc = new ErlangBfunct();
@@ -8505,8 +8663,6 @@ public class Stat extends ArrayMaths{
         // totalTraffic:    total traffic in Erlangs
         // totalResouces:   total number of resources in the system
         public static double erlangCprobability(double totalTraffic, double totalResources){
-            if(totalResources<1)throw new IllegalArgumentException("Total resources, " + totalResources + ", must be an integer greater than or equal to 1");
-            if(!Fmath.isInteger(totalResources))throw new IllegalArgumentException("Total resources, " + totalResources + ", must be, arithmetically, an integer");
 
             double prob = 0.0D;
             if(totalTraffic>0.0D){
@@ -8533,8 +8689,6 @@ public class Stat extends ArrayMaths{
         // nonZeroDelayProbability:    probablility that a customer will receive a non-zero delay in obtaining obtaining a resource
         // totalResouces:   total number of resources in the system
         public static double erlangCload(double nonZeroDelayProbability, double totalResources){
-            if(totalResources<1)throw new IllegalArgumentException("Total resources, " + totalResources + ", must be an integer greater than or equal to 1");
-            if(!Fmath.isInteger(totalResources))throw new IllegalArgumentException("Total resources, " + totalResources + ", must be, arithmetically, an integer");
 
             // Create instance of the class holding the Erlang C equation
             ErlangCfunct eCfunc = new ErlangCfunct();
@@ -9640,9 +9794,9 @@ public class Stat extends ArrayMaths{
                     LogNormalThreeParFunct lognorm = new LogNormalThreeParFunct();
 
                     // set function variables
-                    lognorm.data.alpha = alpha;
-                    lognorm.data.beta = beta;
-                    lognorm.data.gamma = gamma;
+                    lognorm.alpha = alpha;
+                    lognorm.beta = beta;
+                    lognorm.gamma = gamma;
 
                     // required tolerance
                     double tolerance = 1e-12;
@@ -9668,7 +9822,7 @@ public class Stat extends ArrayMaths{
                     realR.supressNaNmessage();
 
                     //  set function cfd  variable
-                    lognorm.data.cfd = prob;
+                    lognorm.cfd = prob;
 
                     // call root searching method
                     icdf = realR.bisect(lognorm, lowerBound, upperBound);
@@ -12126,7 +12280,7 @@ public class Stat extends ArrayMaths{
                     for(int i=maxIndex; i<nValues-1; i++)copy1[i] = copy0[i+1];
 
                     nValues--;
-                    am = new Stat(copy1.clone());
+                    am = new Stat(Conv.copy(copy1));
                 }
                 else{
                     test=false;
@@ -12197,7 +12351,7 @@ public class Stat extends ArrayMaths{
                     for(int i=maxIndex; i<nValues-1; i++)copy1[i] = copy0[i+1];
 
                     nValues--;
-                    am = new Stat(copy1.clone());
+                    am = new Stat(Conv.copy(copy1));
                 }
                 else{
                     mean = null;
@@ -12301,7 +12455,7 @@ public class Stat extends ArrayMaths{
                     for(int i=minIndex; i<nValues-1; i++)copy1[i] = copy0[i+1];
 
                     nValues--;
-                    am = new Stat(copy1.clone());
+                    am = new Stat(Conv.copy(copy1));
                 }
                 else{
                     test=false;
@@ -12370,7 +12524,7 @@ public class Stat extends ArrayMaths{
                     for(int i=minIndex; i<nValues-1; i++)copy1[i] = copy0[i+1];
 
                     nValues--;
-                    am = new Stat(copy1.clone());
+                    am = new Stat(Conv.copy(copy1));
                 }
                 else{
                     mean = null;
@@ -12478,13 +12632,13 @@ public class Stat extends ArrayMaths{
             am.originalTypes = null;
         }
         else{
-            am.originalTypes = this.originalTypes.clone();
+            am.originalTypes = Conv.copy(this.originalTypes);
         }
         if(this.sortedIndices==null){
             am.sortedIndices = null;
         }
         else{
-            am.sortedIndices = this.sortedIndices.clone();
+            am.sortedIndices = Conv.copy(this.sortedIndices);
         }
         am.suppressMessages = this.suppressMessages;
         am.minmax = new ArrayList<Object>();
@@ -12638,33 +12792,33 @@ public class Stat extends ArrayMaths{
 
         switch(this.type){
             case 0:
-            case 1: double[] dd = this.getArray_as_double().clone();
+            case 1: double[] dd = Conv.copy(this.getArray_as_double());
                     for(int i=0; i<this.length; i++)am.array.add(new Double(dd[i]));
                     break;
             case 2:
-            case 3: float[] ff = this.getArray_as_float().clone();
+            case 3: float[] ff = Conv.copy(this.getArray_as_float());
                     for(int i=0; i<this.length; i++)am.array.add(new Float(ff[i]));
                     break;
             case 4:
-            case 5: long[] ll = this.getArray_as_long().clone();
+            case 5: long[] ll = Conv.copy(this.getArray_as_long());
                     for(int i=0; i<this.length; i++)am.array.add(new Long(ll[i]));
                     break;
             case 6:
-            case 7: int[] ii = this.getArray_as_int().clone();
+            case 7: int[] ii = Conv.copy(this.getArray_as_int());
                     for(int i=0; i<this.length; i++)am.array.add(new Integer(ii[i]));
                     break;
             case 8:
-            case 9: short[] ss = this.getArray_as_short().clone();
+            case 9: short[] ss = Conv.copy(this.getArray_as_short());
                     for(int i=0; i<this.length; i++)am.array.add(new Short(ss[i]));
                     break;
             case 10:
-            case 11: byte[] bb = this.getArray_as_byte().clone();
+            case 11: byte[] bb = Conv.copy(this.getArray_as_byte());
                     for(int i=0; i<this.length; i++)am.array.add(new Byte(bb[i]));
                     break;
-            case 12: BigDecimal[] bd = this.getArray_as_BigDecimal().clone();
+            case 12: BigDecimal[] bd = Conv.copy(this.getArray_as_BigDecimal());
                     for(int i=0; i<this.length; i++)am.array.add(bd[i]);
                     break;
-            case 13: BigInteger[] bi = this.getArray_as_BigInteger().clone();
+            case 13: BigInteger[] bi = Conv.copy(this.getArray_as_BigInteger());
                     for(int i=0; i<this.length; i++)am.array.add(bi[i]);
                     break;
             case 14: Complex[] ccc = this.getArray_as_Complex();
@@ -12674,10 +12828,10 @@ public class Stat extends ArrayMaths{
                     for(int i=0; i<this.length; i++)am.array.add(ppp[i].copy());
                     break;
             case 16:
-            case 17: char[] cc = this.getArray_as_char().clone();
+            case 17: char[] cc = Conv.copy(this.getArray_as_char());
                     for(int i=0; i<this.length; i++)am.array.add(new Character(cc[i]));
                     break;
-            case 18: String[] sss = this.getArray_as_String().clone();
+            case 18: String[] sss = Conv.copy(this.getArray_as_String());
                     for(int i=0; i<this.length; i++)am.array.add(sss[i]);
                     break;
         }
@@ -13560,6 +13714,23 @@ class LogNormalTwoParFunct implements RealRootFunction{
         }
 }
 
+// Class to evaluate the three parameter log-normal distribution function
+class LogNormalThreeParFunct implements RealRootFunction{
+
+            public double cfd = 0.0D;
+            public double alpha = 0.0D;
+            public double beta = 0.0D;
+            public double gamma = 0.0D;
+
+            public double function(double x){
+
+                double y = cfd - Stat.logNormalThreeParCDF(alpha, beta, gamma, x);
+
+                return y;
+            }
+
+}
+
 // Class to evaluate inverse gamma function
 class InverseGammaFunct implements RealRootFunction{
 
@@ -13571,4 +13742,25 @@ class InverseGammaFunct implements RealRootFunction{
 
             return y;
         }
+}
+
+// Class to evaluate complementary regularised incomplte gamma function
+class CrigFunct implements IntegralFunction{
+
+    private double a = 0.0D;
+    private double b = 0.0D;
+
+    public double function(double x){
+        double y = -x + (a-1.0)*Math.log(x) - b;
+        y =  Math.exp(y);
+        return y;
+    }
+
+    public void setA(double a){
+        this.a = a;
+    }
+
+    public void setB(double b){
+        this.b = b;
+    }
 }

@@ -9,14 +9,14 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:	May 2002
-*   UPDATE: 20 May 2003, 17 February 2006, 27 July 2007, 4 December 2007, 31 October 2009
+*   UPDATE: 20 May 2003, 17 February 2006, 27 July 2007, 4 December 2007, 31 October 2009, 5 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/TriCubicSpline.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2003 - 2009  Michael Thomas Flanagan
+*   Copyright (c) 2003 - 2011  Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for

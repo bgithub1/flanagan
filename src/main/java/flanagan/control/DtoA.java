@@ -12,14 +12,14 @@
 *           Author:  Michael Thomas Flanagan.
 *
 *           Created: 27 June 2003
-*           Revised: 18 August 2003, 9 May 2005, April 2008, 7 November 2009
+*           Revised: 18 August 2003, 9 May 2005, April 2008, 7 November 2009, 18 January 2011
 *
 *           DOCUMENTATION:
 *           See Michael T Flanagan's JAVA library on-line web page:
 *           http://www.ee.ucl.ac.uk/~mflanaga/java/DtoA.html
 *           http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2003 - 2009   Michael Thomas Flanagan
+*   Copyright (c) 2003 - 2011   Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for
@@ -36,6 +36,7 @@
 package flanagan.control;
 
 import flanagan.complex.*;
+import flanagan.math.Conv;
 
 public class DtoA  extends BlackBox{
 
@@ -129,7 +130,7 @@ public class DtoA  extends BlackBox{
 
         // Check if input is negative
         long sign = 1L;
-        int[] vPosBinary = this.vBinary.clone();
+        int[] vPosBinary = Conv.copy(this.vBinary);
         if(this.vBinary[len-1]==1){
             sign = -1L;
             vPosBinary = this.negateNegativeBinary(vPosBinary);
@@ -171,7 +172,7 @@ public class DtoA  extends BlackBox{
 
         // Check if input is negative
         long sign = 1L;
-        int[] vPosBinary = this.vBinary.clone();
+        int[] vPosBinary = Conv.copy(this.vBinary);
         if(this.vBinary[len-1]==1){
             sign = -1L;
             vPosBinary = this.negateNegativeBinary(this.vBinary);
@@ -375,7 +376,7 @@ public class DtoA  extends BlackBox{
             bb.nBits = this.nBits;
             bb.maximumDecimal = this.maximumDecimal;
             bb.vRef = this.vRef;
-            bb.vBinary = this.vBinary.clone();
+            bb.vBinary = Conv.copy(this.vBinary);
             bb.trueDtoA = this.trueDtoA;
             bb.outputVoltage = this.outputVoltage;
             bb.voltageInput = this.voltageInput;

@@ -1275,7 +1275,7 @@ public class PlanarWaveguide{
                         tempRefra[i] = ((Double)arraylTE.get(arraylIndex++)).doubleValue();
                         testVec += 2;
                     }
-                    double[] log10TempThick = tempThick.clone();
+                    double[] log10TempThick = Conv.copy(tempThick);
                     for(int i=0; i<tempI; i++)log10TempThick[i] = Fmath.log10(tempThick[i]);
 
                     plotData[plotNumber++] = log10TempThick;
@@ -1323,7 +1323,7 @@ public class PlanarWaveguide{
                         tempRefra[i] = ((Double)arraylTM.get(arraylIndex++)).doubleValue();
                         testVec += 2;
                     }
-                    double[] log10TempThick = tempThick.clone();
+                    double[] log10TempThick = Conv.copy(tempThick);
                     for(int i=0; i<tempI; i++)log10TempThick[i] = Fmath.log10(tempThick[i]);
 
                     plotData[plotNumber++] = log10TempThick;

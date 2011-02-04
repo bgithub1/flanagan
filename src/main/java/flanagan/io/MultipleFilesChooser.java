@@ -9,14 +9,14 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       28 November 2005
-*   AMENDED:    11 August 2006
+*   AMENDED:    11 August 2006, 31 October 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/MultipleFilesChooser.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) November 2005
+*   Copyright (c) 2005 - 2010
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for
@@ -49,12 +49,13 @@ public class MultipleFilesChooser{
     private int nFiles = 0;                 // Number of files selected
     private String path = null;             // path to directory from which the files are selected
                                             //      e.g. "C:\\Java\\flanagan
-                                            //      default (path=null) - home directory
+                                            //      default (path=null) - current directory
     private String extn = null;             // file type extension of files to be displayed
                                             //      default (extn=null) - all file types displayed
     // constructor
     // opens home directory
     public MultipleFilesChooser(){
+        this.path = System.getProperty("user.dir");
     }
 
     // constructor

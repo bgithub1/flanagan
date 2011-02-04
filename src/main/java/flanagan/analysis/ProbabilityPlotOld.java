@@ -1217,7 +1217,7 @@ public class ProbabilityPlot{
 
             // Obtain best probability plot varying mu, sigma and gamma
             // by minimizing the sum of squares of the differences between the ordered data and the ordered statistic medians
-            min.simplex(wppf, Conv.copy(start), step, tolerance);
+            min.simplex(wppf, start.clone(), step, tolerance);
 
             // Obtain best estimates or first minimisation
             double[] firstBests = min.getBestEstimates();
@@ -1241,7 +1241,7 @@ public class ProbabilityPlot{
             if(start2[1]<=0.0)start2[2] = Math.abs(2.0*firstBests[2] - 0.98*start[2]);
             step[2] = Math.abs(start2[2]*0.1);
 
-            min.simplex(wppf, Conv.copy(start2), step, tolerance);
+            min.simplex(wppf, start2.clone(), step, tolerance);
 
             // Get mu, sigma and gamma for best correlation coefficient
             this.weibullParam = min.getBestEstimates();
@@ -1426,7 +1426,7 @@ public class ProbabilityPlot{
 
             // Obtain best probability plot varying sigma and gamma
             // by minimizing the sum of squares of the differences between the ordered data and the ordered statistic medians
-            min.simplex(wppf, Conv.copy(start), step, tolerance);
+            min.simplex(wppf, start.clone(), step, tolerance);
 
             // Obtain best estimates or first minimisation
             double[] firstBests = min.getBestEstimates();
@@ -1447,7 +1447,7 @@ public class ProbabilityPlot{
             if(start2[1]<=0.0)start2[1] = Math.abs(2.0*firstBests[1] - 0.98*start[1]);
             step[1] = Math.abs(start2[1]*0.1);
 
-            min.simplex(wppf, Conv.copy(start2), step, tolerance);
+            min.simplex(wppf, start2.clone(), step, tolerance);
 
             // Get sigma and gamma for best correlation coefficient
             this.weibullTwoParParam = min.getBestEstimates();
@@ -1610,7 +1610,7 @@ public class ProbabilityPlot{
 
             // Obtain best probability plot varying gamma
             // by minimizing the sum of squares of the differences between the ordered data and the ordered statistic medians
-            min.simplex(wppf, Conv.copy(start), step, tolerance);
+            min.simplex(wppf, start.clone(), step, tolerance);
 
             // Obtain best estimates or first minimisation
             double[] firstBests = min.getBestEstimates();
@@ -1628,7 +1628,7 @@ public class ProbabilityPlot{
             step[0] = Math.abs(start2[0]*0.1);
             if(step[0]==0)step[0] = this.range*0.01;
 
-            min.simplex(wppf, Conv.copy(start2), step, tolerance);
+            min.simplex(wppf, start2.clone(), step, tolerance);
 
             // Get gamma for best correlation coefficient
             this.weibullStandardParam = min.getBestEstimates();
@@ -1931,7 +1931,7 @@ public class ProbabilityPlot{
 
             // Obtain best probability plot varying mu, sigma and gamma
             // by minimizing the sum of squares of the differences between the ordered data and the ordered statistic medians
-            min.simplex(fppf, Conv.copy(start), step, tolerance);
+            min.simplex(fppf, start.clone(), step, tolerance);
 
             // Obtain best estimates or first minimisation
             double[] firstBests = min.getBestEstimates();
@@ -1951,7 +1951,7 @@ public class ProbabilityPlot{
             if(start2[1]<=0.0)start2[2] = Math.abs(2.0*firstBests[2] - 0.98*start[2]);
             step[2] = Math.abs(start2[2]*0.1);
 
-            min.simplex(fppf, Conv.copy(start2), step, tolerance);
+            min.simplex(fppf, start2.clone(), step, tolerance);
 
             // Get mu, sigma and gamma for best correlation coefficient
             this.frechetParam = min.getBestEstimates();

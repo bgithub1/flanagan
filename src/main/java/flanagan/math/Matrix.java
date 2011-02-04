@@ -9,25 +9,11 @@
 *
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
-*   DATE:	 June 2002
-*   UPDATES:  21 April 2004, 19 January 2005, 1 May 2005
-*             16 February 2006 Set methods corrected thanks to Myriam Servières, Equipe IVC , Ecole Polytechnique de l'universitè de Nantes, Laboratoire IRCCyN/UMR CNRS
-*             31 March 2006 Norm methods corrected thanks to Jinshan Wu, University of British Columbia
-*             22 April 2006 getSubMatrix methods corrected thanks to Joachim Wesner
-*             1 July 2007 row matrix, column matrix  and division added
-*             17 July 2007 solution of overdetermined linear equations and eigen values and vectros of a symmetric matrix added
-*             18 August 2007 zero replacement in LU decompostion made a variable that the user may set
-*             7 October 2007 get row and column numbers methods revised
-*             27 February 2008 symmetric eigen method corrected - thanks to Mike Kroutikov
-*             7 April 2008 and 5 July 2008 code tidying
-*             6-15 September 2008 constructors extended, maximum element, minimum element and pivot methods added
-*             7-14 October 2008 subtract means added, eigenvector methods updated
-*             16 February 2009 - switched indices in FroebeniusNorm corrected - thanks to Istvan Szita, Rutgers University
-*             16 June 2009 timesEquals corrected thanks to Bjorn Nordstom, Ericsonn
-*             15 October 2009 - updated determinant method
-*             4-5 November 2009 - Reduced Row Echelon Form added
-*             12 January 2010 - SetSubMatrix method corrected
-*             19 February 2010 - subtractMean corrected
+*   DATE:	    June 2002
+*   UPDATES:    21 April 2004, 16 February 2006, 31 March 2006, 22 April 2006, 1 July 2007, 17 July 2007
+*               18 August 2007, 7 October 2007, 27 February 2008, 7 April 2008, 5 July 2008, 6-15 September 2008
+*               7-14 October 2008, 16 February 2009, 16 June 2009, 15 October 2009, 4-5 November 2009
+*               12 January 2010, 19 February 2010, 14 November 2010, 12 January 2011, 20 January 2011
 *
 *
 *   DOCUMENTATION:
@@ -35,7 +21,7 @@
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/Matrix.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2002 - 2010  Michael Thomas Flanagan
+*   Copyright (c) 2002 - 2011  Michael Thomas Flanagan
 *   PERMISSION TO COPY:
 *
 * Permission to use, copy and modify this software and its documentation for NON-COMMERCIAL purposes is granted, without fee,
@@ -59,6 +45,7 @@ package flanagan.math;
 import flanagan.analysis.Regression;
 import flanagan.analysis.RegressionFunction;
 import flanagan.math.ArrayMaths;
+import flanagan.math.Conv;
 import flanagan.analysis.Stat;
 
 import java.util.ArrayList;
@@ -278,7 +265,7 @@ public class Matrix{
 		            this.matrix[i][j] = bb.matrix[i][j];
 		        }
 		    }
-		    this.permutationIndex = bb.permutationIndex.clone();
+		    this.permutationIndex = Conv.copy(bb.permutationIndex);
             this.rowSwapIndex = bb.rowSwapIndex;
  	    }
 
@@ -316,8 +303,9 @@ public class Matrix{
     	public void setSubMatrix(int i, int j, double[][] subMatrix){
     	    int k = subMatrix.length;
     	    int l = subMatrix[0].length;
-        	if(i>k)throw new IllegalArgumentException("row indices inverted");
-        	if(j>l)throw new IllegalArgumentException("column indices inverted");
+        	if(i+k-1>=this.numberOfRows)throw new IllegalArgumentException("Sub-matrix position is outside the row bounds of this Matrix");
+        	if(j+l-1>=this.numberOfColumns)throw new IllegalArgumentException("Sub-matrix position is outside the column bounds of this Matrix");
+
         	int m = 0;
         	int n = 0;
         	for(int p=0; p<k; p++){
@@ -488,7 +476,7 @@ public class Matrix{
     	public double[] getRowCopy(int i){
     	    if(i>=this.numberOfRows)throw new IllegalArgumentException("Row index, " + i + ", must be less than the number of rows, " + this.numberOfRows);
     	    if(i<0)throw new IllegalArgumentException("Row index, " + i + ", must be zero or positive");
-        	return this.matrix[i].clone();
+        	return Conv.copy(this.matrix[i]);
     	}
 
         // Return a copy of a column
@@ -523,8 +511,11 @@ public class Matrix{
     	// Return a sub-matrix starting with row index i, column index j
     	// and ending with row index k, column index l
     	public Matrix getSubMatrix(int i, int j, int k, int l){
-        	if(i>k)throw new IllegalArgumentException("row indices inverted");
+    	    if(i>k)throw new IllegalArgumentException("row indices inverted");
         	if(j>l)throw new IllegalArgumentException("column indices inverted");
+        	if(k>=this.numberOfRows)throw new IllegalArgumentException("Sub-matrix position is outside the row bounds of this Matrix" );
+        	if(l>=this.numberOfColumns)throw new IllegalArgumentException("Sub-matrix position is outside the column bounds of this Matrix" + i + " " +l);
+
         	int n=k-i+1, m=l-j+1;
         	Matrix subMatrix = new Matrix(n, m);
         	double[][] sarray = subMatrix.getArrayReference();
@@ -2009,7 +2000,7 @@ public class Matrix{
     	    boolean test = true;
      	    for(int i=0; i<this.numberOfRows; i++){
     	        for(int j=0; j<this.numberOfColumns; j++){
-    	            if(j<i && this.matrix[i][j]>Math.abs(tolerance))test = false;
+    	            if(j<i && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
     	        }
     	    }
     	    return test;
@@ -2020,7 +2011,7 @@ public class Matrix{
     	    boolean test = true;
     	    for(int i=0; i<this.numberOfRows; i++){
     	        for(int j=0; j<this.numberOfColumns; j++){
-    	            if(i>j && this.matrix[i][j]>Math.abs(tolerance))test = false;
+    	            if(i>j && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
     	        }
     	    }
     	    return test;
@@ -2035,8 +2026,8 @@ public class Matrix{
     	        for(int i=0; i<this.numberOfRows; i++){
     	            if(Math.abs(this.matrix[i][i]-1.0D)>Math.abs(tolerance))test = false;
     	            for(int j=i+1; j<this.numberOfColumns; j++){
-    	                if(this.matrix[i][j]>Math.abs(tolerance))test = false;
-    	                if(this.matrix[j][i]>Math.abs(tolerance))test = false;
+    	                if(Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
+    	                if(Math.abs(this.matrix[j][i])>Math.abs(tolerance))test = false;
     	            }
     	        }
     	    }
@@ -2051,8 +2042,20 @@ public class Matrix{
     	    boolean test = true;
     	    for(int i=0; i<this.numberOfRows; i++){
     	        for(int j=0; j<this.numberOfColumns; j++){
-    	            if(i<(j+1) && this.matrix[i][j]>Math.abs(tolerance))test = false;
-    	            if(j>(i+1) && this.matrix[i][j]>Math.abs(tolerance))test = false;
+    	            if(i<(j+1) && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
+    	            if(j>(i+1) && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
+    	        }
+    	    }
+    	    return test;
+    	}
+
+    	// Check if a matrix is tridiagonal within a given tolerance
+    	public boolean isNearlyTridiagonal(double tolerance){
+    	    boolean test = true;
+    	    for(int i=0; i<this.numberOfRows; i++){
+    	        for(int j=0; j<this.numberOfColumns; j++){
+    	            if(i<(j+1) && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
+    	            if(j>(i+1) && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
     	        }
     	    }
     	    return test;
@@ -2063,7 +2066,7 @@ public class Matrix{
     	    boolean test = true;
     	    for(int i=0; i<this.numberOfRows; i++){
     	        for(int j=0; j<this.numberOfColumns; j++){
-    	            if(j<(i+1) && this.matrix[i][j]>Math.abs(tolerance))test = false;
+    	            if(j<(i+1) && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
     	        }
     	    }
     	    return test;
@@ -2074,11 +2077,111 @@ public class Matrix{
     	    boolean test = true;
     	    for(int i=0; i<this.numberOfRows; i++){
     	        for(int j=0; j<this.numberOfColumns; j++){
-    	            if(i>(j+1) && this.matrix[i][j]>Math.abs(tolerance))test = false;
+    	            if(i>(j+1) && Math.abs(this.matrix[i][j])>Math.abs(tolerance))test = false;
     	        }
     	    }
     	    return test;
     	}
+
+    	// Check if a matrix is singular
+    	public boolean isSingular(){
+    	    boolean test = false;
+    	    double det = this.determinant();
+    	    if(det==0.0)test = true;
+    	    return test;
+    	}
+
+    	// Check if a matrix is singular within a given tolerance
+    	public boolean isNearlySingular(double tolerance){
+    	    boolean test = false;
+    	    double det = this.determinant();
+    	    if(Math.abs(det)<=Math.abs(tolerance))test = true;
+    	    return test;
+    	}
+
+
+    	// Check for identical rows
+    	// Returns the number of pairs of identical rows followed by the row indices of the identical row pairs
+    	public ArrayList<Integer> identicalRows(){
+    	    ArrayList<Integer> ret = new ArrayList<Integer>();
+    	    int nIdentical = 0;
+    	    for(int i=0; i<this.numberOfRows-1; i++){
+    	        for(int j=i+1; j<this.numberOfRows; j++){
+    	            int m = 0;
+    	            for(int k=0; k<this.numberOfColumns; k++){
+    	                if(this.matrix[i][k]==this.matrix[j][k])m++;
+    	            }
+    	            if(m==this.numberOfColumns){
+    	                nIdentical++;
+    	                ret.add(new Integer(i));
+    	                ret.add(new Integer(j));
+    	            }
+    	        }
+    	    }
+    	    ret.add(0,new Integer(nIdentical));
+    	    return ret;
+    	}
+
+    	// Check for identical columnss
+    	// Returns the number of pairs of identical columns followed by the column indices of the identical column pairs
+    	public ArrayList<Integer> identicalColumns(){
+    	    ArrayList<Integer> ret = new ArrayList<Integer>();
+    	    int nIdentical = 0;
+    	    for(int i=0; i<this.numberOfColumns; i++){
+    	        for(int j=i+1; j<this.numberOfColumns-1; j++){
+    	            int m = 0;
+    	            for(int k=0; k<this.numberOfRows; k++){
+    	                if(this.matrix[k][i]==this.matrix[k][j])m++;
+    	            }
+    	            if(m==this.numberOfRows){
+    	                nIdentical++;
+    	                ret.add(new Integer(i));
+    	                ret.add(new Integer(j));
+    	            }
+    	        }
+    	    }
+    	    ret.add(0,new Integer(nIdentical));
+    	    return ret;
+    	}
+
+    	// Check for zero rows
+    	// Returns the number of columns of all zeros followed by the column indices
+    	public ArrayList<Integer> zeroRows(){
+    	    ArrayList<Integer> ret = new ArrayList<Integer>();
+    	    int nZero = 0;
+    	    for(int i=0; i<this.numberOfRows; i++){
+    	        int m = 0;
+    	        for(int k=0; k<this.numberOfColumns; k++){
+    	            if(this.matrix[i][k]==0.0)m++;
+    	        }
+    	        if(m==this.numberOfColumns){
+    	            nZero++;
+    	            ret.add(new Integer(i));
+    	        }
+    	    }
+    	    ret.add(0,new Integer(nZero));
+    	    return ret;
+    	}
+
+    	// Check for zero columns
+    	// Returns the number of columns of all zeros followed by the column indices
+    	public ArrayList<Integer> zeroColumns(){
+    	    ArrayList<Integer> ret = new ArrayList<Integer>();
+    	    int nZero = 0;
+    	    for(int i=0; i<this.numberOfColumns; i++){
+    	        int m = 0;
+    	        for(int k=0; k<this.numberOfRows; k++){
+    	            if(this.matrix[k][i]==0.0)m++;
+    	        }
+    	        if(m==this.numberOfRows){
+    	            nZero++;
+    	            ret.add(new Integer(i));
+    	        }
+    	    }
+    	    ret.add(0,new Integer(nZero));
+    	    return ret;
+    	}
+
 
     	// LU DECOMPOSITION OF MATRIX A
     	// For details of LU decomposition
@@ -2480,8 +2583,8 @@ public class Matrix{
         private void eigenSort(){
 	        int k = 0;
 	        double holdingElement;
-	        this.sortedEigenValues = this.eigenValues.clone();
-	        this.sortedEigenVector = this.eigenVector.clone();
+	        this.sortedEigenValues = Conv.copy(this.eigenValues);
+	        this.sortedEigenVector = Conv.copy(this.eigenVector);
 	        this.eigenIndices = new int[this.numberOfRows];
 
 	        for(int i=0; i<this.numberOfRows-1; i++){

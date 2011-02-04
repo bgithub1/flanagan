@@ -12,16 +12,8 @@
 * 	WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:	    June 2002
-*   UPDATES:    16 February 2006 Set methods corrected thanks to Myriam Servi?res, Equipe IVC , Ecole Polytechnique de l'universit? de Nantes, Laboratoire IRCCyN/UMR CNRS
-*               7 March 2006
-*               31 March 2006 Norm methods corrected thanks to Jinshan Wu, University of British Columbia
-*               22 April 2006 getSubMatrix corrected thanks to Joachim Wesner
-*               1 July 2007 dividsion and extra conversion methods added
-*               19 April 2008 rowMatrix and columnMatrix added
-*               8 October 2008 inverse methods updated
-*               16 June 2009 timesEquals corrected thanks to Bjorn Nordstom, Ericsonn
-*               5 November 2009 Reduced Row Echelon Form added
-*               12 January 2010 SetSubMatrix method corrected thanks to Dr. Kay Nehrke, Philips Technologie, Hamburg
+*   UPDATES:    16 February 2006, 7 March 2006, 31 March 2006, 22 April 2006, 1 July 2007, 9 April 2008
+*               18 October 2008, 16 June 2009, November 2009, 12 January 2010, 14 November 2010
 *
 *
 *   DOCUMENTATION:
@@ -190,10 +182,11 @@ public class ComplexMatrix{
 
     	// Set a sub-matrix starting with row index i, column index j
     	public void setSubMatrix(int i, int j, Complex[][] subMatrix){
-    	    int k = subMatrix.length;
+        	int k = subMatrix.length;
     	    int l = subMatrix[0].length;
-        	if(i>k)throw new IllegalArgumentException("row indices inverted");
-        	if(j>l)throw new IllegalArgumentException("column indices inverted");
+        	if(i+k-1>=this.nrow)throw new IllegalArgumentException("Sub-matrix position is outside the row bounds of this Matrix");
+        	if(j+l-1>=this.ncol)throw new IllegalArgumentException("Sub-matrix position is outside the column bounds of this Matrix");
+
         	int m = 0;
         	int n = 0;
         	for(int p=0; p<k; p++){
@@ -398,8 +391,11 @@ public class ComplexMatrix{
     	// Return a sub-matrix starting with row index i, column index j
     	// and ending with row index k, column index l
     	public ComplexMatrix getSubMatrix(int i, int j, int k, int l){
-        	if(i>k)throw new IllegalArgumentException("row indices inverted");
+    	    if(i>k)throw new IllegalArgumentException("row indices inverted");
         	if(j>l)throw new IllegalArgumentException("column indices inverted");
+        	if(k>=this.nrow)throw new IllegalArgumentException("Sub-matrix position is outside the row bounds of this Matrix" );
+        	if(l>=this.ncol)throw new IllegalArgumentException("Sub-matrix position is outside the column bounds of this Matrix" + i + " " +l);
+
         	int n=k-i+1, m=l-j+1;
         	ComplexMatrix subMatrix = new ComplexMatrix(n, m);
         	Complex[][] sarray = subMatrix.getArrayReference();

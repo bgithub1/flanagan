@@ -6,14 +6,14 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       13  April 2008  (Most methods taken from existing classes to make a separate print to screen class)
-*   AMENDED:    11 August 2008, 14 September 2008
+*   AMENDED:    11 August 2008, 14 September 2008, 18 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/PrintToScreen.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2008 Michael Thomas Flanagan
+*   Copyright (c) 2008 - 2011 Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *
@@ -38,6 +38,7 @@ package flanagan.io;
 import java.math.*;
 
 import flanagan.math.Fmath;
+import flanagan.math.Conv;
 import flanagan.math.ArrayMaths;
 import flanagan.complex.Complex;
 import flanagan.circuits.Phasor;
@@ -664,7 +665,7 @@ public class PrintToScreen{
         // print a 2D array of Phasor to screen
         public static void print(Phasor[][] aa, int trunc){
 
-            Phasor[][] aam = aa.clone();
+            Phasor[][] aam = Conv.copy(aa);
             for(int i=0; i<aam.length; i++){
                 for(int j=0; j<aam[i].length; j++){
                     aam[i][j] = Phasor.truncate(aam[i][j], trunc);

@@ -12,14 +12,14 @@
 *
 *   DATE:       17 July 2004
 *   REVISED:    11 June 2005 - Made a subclass of FileInput
-*               30 November 2005, 2 July 2006, 20 September 2006, 7 July 2008
+*               30 November 2005, 2 July 2006, 20 September 2006, 7 July 2008, 31 October 2010, 13 December 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/FileChooser.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2006 - 2008   Michael Thomas Flanagan
+*   Copyright (c) 2006 - 2010   Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for
@@ -45,13 +45,14 @@ public class FileChooser extends FileInput{
     private File file;              // file fo be selected
     private String path = null;     // path to directory from which the file is selected
                                     //      e.g. "C:\\Java\\flanagan
-                                    //      default (path=null) - home directory
+                                    //      default (path=null) - current directory
     private String extn = null;     // file type extension of files to be displayed
                                     //      default (extn=null) - all file types displayed
     // constructor
     // opens home directory
     public FileChooser(){
         super();
+        this.path = System.getProperty("user.dir");
     }
 
     // constructor
@@ -91,6 +92,7 @@ public class FileChooser extends FileInput{
 	    if(file==null){
 	        super.fileName = null;
 	        super.stemName = null;
+	        super.extension = null;
 	        super.pathName = null;
 	        super.dirPath = null;
 	        super.fileFound=false;
@@ -102,9 +104,12 @@ public class FileChooser extends FileInput{
 	        int posDot = super.fileName.indexOf('.');
 	        if(posDot==-1){
                 super.stemName = super.fileName;
+                super.extension = "";
             }
             else{
                 super.stemName = super.fileName.substring(0, posDot);
+                super.extension = super.fileName.substring(posDot);
+                this.extn = super.extension;
             }
 
 	        try{
@@ -138,7 +143,7 @@ public class FileChooser extends FileInput{
         this.extn = null;
     }
 
-    // get extension
+    // get extension used
     public String getExtension(){
         return this.extn;
     }

@@ -9,14 +9,14 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       October 2008
-*   AMENDED:    17-18 October 2008, 4 January 2010
+*   AMENDED:    17-18 October 2008, 4 January 2010, 13 November 2010, 29-30 November 2010, 4 December 2010, 18 January 2011
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/PCA.html
 *
-*   Copyright (c) 2008 - 2010 Michael Thomas Flanagan
+*   Copyright (c) 2008 - 2011 Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *
@@ -61,6 +61,7 @@ public class PCA extends Scores{
     private double[] orderedEigenValues = null;                         // eigenvalues sorted into a descending order
     private int[] eigenValueIndices = null;                             // indices of the eigenvalues before sorting into a descending order
     private double eigenValueTotal = 0.0;                               // total of all eigen values;
+    private int[] rotatedIndices = null;                                // rearranged indices on ordering after rotation
 
     private double[] rotatedEigenValues = null;                         // scaled rotated eigenvalues
     private double[] usRotatedEigenValues = null;                       // unscaled rotated eigenvalues
@@ -105,13 +106,15 @@ public class PCA extends Scores{
 
     private int nVarimaxMax = 1000;                                     // maximum iterations allowed by the varimax criterion
     private int nVarimax = 0;                                           // number of iterations taken by the varimax criterion
-    private double varimaxTolerance = 0.0001;                           // tolerance for terminatiing 2 criterion iteration
+    private double varimaxTolerance = 1.0E-8;                           // tolerance for terminatiing 2 criterion iteration
 
     private boolean varimaxOption = true;                               // = true:  normal varimax, i.e. comunality weighted varimax
                                                                         // = false: raw varimax
     private boolean pcaDone = false;                                    // = true when PCA performed
     private boolean monteCarloDone = false;                             // = true when parallel monte Carlo simultaion performed
     private boolean rotationDone = false;                               // = true when rotation performed
+
+
 
     // CONSTRUCTOR
     public PCA(){
@@ -181,6 +184,8 @@ public class PCA extends Scores{
         return this.percentile;
     }
 
+
+
     // PRINCIPAL COMPONENT ANALYSIS
     public void pca(){
 
@@ -207,7 +212,10 @@ public class PCA extends Scores{
             if(!super.nFactorOption)denom -= 1.0;
             this.covarianceMatrix = this.covarianceMatrix.times(1.0/denom);
 
+
+
             // Correlation matrix
+            boolean tinyCheck = false;
             double[][] cov = this.covarianceMatrix.getArrayCopy();
             double[][] corr = new double[this.nItems][this.nItems];
             for(int i=0; i<this.nItems; i++){
@@ -217,9 +225,13 @@ public class PCA extends Scores{
                     }
                     else{
                         corr[i][j] = cov[i][j]/Math.sqrt(cov[i][i]*cov[j][j]);
+                        if(Fmath.isNaN(corr[i][j])){
+                            corr[i][j] = 0.0;
+                        }
                     }
                 }
             }
+
             this.correlationMatrix = new Matrix(corr);
 
             // Choose matrix
@@ -230,7 +242,6 @@ public class PCA extends Scores{
             else{
                 forEigen = this.correlationMatrix;
             }
-
 
             // Calculate eigenvalues
             this.eigenValues = forEigen.getEigenValues();
@@ -543,7 +554,12 @@ public class PCA extends Scores{
         for(int j = 0; j<nColumns; j++)communalityWeights[j] = Math.sqrt(communalityWeights[j]);
         for(int i = 0; i<nRows; i++){
             for(int j = 0; j<nColumns; j++){
-                loadingFactorMatrix[i][j] /= communalityWeights[j];
+                if(loadingFactorMatrix[i][j]==0.0 && communalityWeights[j]==0){
+                    loadingFactorMatrix[i][j] = 1.0;
+                }
+                else{
+                    loadingFactorMatrix[i][j] /= communalityWeights[j];
+                }
                 this.usRotatedLoadingFactorsAsRows[i][j] = loadingFactorMatrix[i][j];
             }
         }
@@ -570,11 +586,15 @@ public class PCA extends Scores{
                 this.nVarimax++;
                 if(this.nVarimax>nVarimaxMax){
                     test=false;
-                    System.out.println("Method varimaxRotation: maximum iterations " + nVarimaxMax + "exceeded");
+                    System.out.println("Method varimaxRotation: maximum iterations " + nVarimaxMax + " exceeded");
+                    System.out.println("Tolerance = " + this.varimaxTolerance + ",     Comparison value = " + Math.abs(va - vaLast));
                     System.out.println("Current values returned");
+                    if(super.sameCheck>0){
+                        System.out.println("Presence of identical element row/s and/or column/s in the data probably impeding convergence");
+                        System.out.println("Returned values are likely to be correct");
+                    }
                 }
             }
-
         }
 
         // undo normalization of rotated loading factors
@@ -599,6 +619,46 @@ public class PCA extends Scores{
             unRotatedEigenValueTotal += this.orderedEigenValues[i];
         }
 
+        // Order unscaled rotated eigenvalues
+        ArrayMaths amrot = new ArrayMaths(this.usRotatedEigenValues);
+        amrot = amrot.sort();
+        this.usRotatedEigenValues = amrot.array();
+        int[] sortedRotIndices = amrot.originalIndices();
+
+        // reverse order
+        int nh = nRows/2;
+        double holdD = 0.0;
+        int holdI = 0;
+        for(int i=0; i<nh; i++){
+            holdD = this.usRotatedEigenValues[i];
+            this.usRotatedEigenValues[i] = this.usRotatedEigenValues[nRows - 1 - i];
+            this.usRotatedEigenValues[nRows - 1 - i] = holdD;
+            holdI = sortedRotIndices[i];
+            sortedRotIndices[i] = sortedRotIndices[nRows - 1 - i];
+            sortedRotIndices[nRows - 1 - i] = holdI;
+        }
+
+        // order rotated power factors to match ordered rotated eigenvalues
+        int nn = this.usRotatedLoadingFactorsAsRows.length;
+        int mm = this.usRotatedLoadingFactorsAsRows[0].length;
+        double[][] holdDA = new double[nn][mm];
+        for(int i=0; i<nn; i++){
+            for(int j=0; j<mm; j++){
+                holdDA[i][j] = this.usRotatedLoadingFactorsAsRows[sortedRotIndices[i]][j];
+            }
+        }
+        this.usRotatedLoadingFactorsAsRows = Conv.copy((double[][])holdDA);
+
+        nn = sortedRotIndices.length;
+        this.rotatedIndices = new int[nn];
+        int[]holdIA = new int[nn];
+        for(int i=0; i<nn; i++){
+            holdIA[i] = this.eigenValueIndices[sortedRotIndices[i]];
+        }
+        this.rotatedIndices = Conv.copy((int[])this.eigenValueIndices);
+        for(int i=0; i<nn; i++){
+            this.rotatedIndices[i] = holdIA[i];
+        }
 
         // Scale rotated loading factors and eigenvalues to the unrotated variance percentage for the sum of the extracted eigenvalues
         double scale0 = Math.abs(unRotatedEigenValueTotal/usRotatedEigenValueTotal);
@@ -683,7 +743,7 @@ public class PCA extends Scores{
                 nIter++;
                 if(nIter>nIterMax){
                     test=false;
-                    System.out.println("Method varimaxRotation: maximum iterations " + nIterMax + "exceeded");
+                    System.out.println("Method varimaxRotation: maximum iterations " + nIterMax + " exceeded");
                     System.out.println("Current values returned");
                 }
             }
@@ -723,9 +783,12 @@ public class PCA extends Scores{
         double va3 = 0.0;
         for(int j=0; j<nRows; j++){
             double sum1 = 0.0;
-            for(int k=0; k<nColumns; k++)sum1 += Math.pow(loadingFactorMatrix[j][k], 4);
+            for(int k=0; k<nColumns; k++){
+                sum1 += Math.pow(loadingFactorMatrix[j][k], 4);
+            }
             va1 += sum1;
         }
+        //Db.show("STOP");
         va1 *= nColumns;
         for(int j=0; j<nRows; j++){
             double sum2 = 0.0;
@@ -733,6 +796,7 @@ public class PCA extends Scores{
             va2 += sum2*sum2;
         }
         va3 = va1 - va2;
+
         return va3;
     }
 
@@ -1414,7 +1478,7 @@ public class PCA extends Scores{
         fout.println();
         fout.print(" ", field1);
         fout.print("component", field1);
-        for(int i=0; i<this.nItems; i++)fout.print((this.eigenValueIndices[i]+1) + " (" + (i+1) + ")", field2);
+        for(int i=0; i<this.nItems; i++)fout.print((this.rotatedIndices[i]+1) + " (" + (i+1) + ")", field2);
         fout.print(" ", field1);
         fout.print("Eigenvalue", field2);
         fout.print("Proportion", field2);
@@ -1422,7 +1486,7 @@ public class PCA extends Scores{
         fout.println("factor");
 
         for(int i=0; i<nExtracted; i++){
-            fout.print((i+1) + " (" + (this.eigenValueIndices[i]+1) + ")", 2*field1);
+            fout.print((i+1) + " (" + (rotatedIndices[i]+1) + ")", 2*field1);
             for(int j=0; j<this.nItems; j++)fout.print(Fmath.truncate(this.rotatedLoadingFactorsAsRows[i][j], this.trunc), field2);
             fout.print(" ", field1);
             fout.print(Fmath.truncate(rotatedEigenValues[i], this.trunc), field2);
@@ -1431,6 +1495,39 @@ public class PCA extends Scores{
         }
         fout.println();
 
+        fout.println("DATA USED");
+        fout.println("Number of items = " + this.nItems);
+        fout.println("Number of persons = " + this.nPersons);
+
+
+        if(this.originalDataType==0){
+            fout.printtab("Item");
+            for(int i=0; i<this.nPersons; i++){
+                fout.printtab(i+1);
+            }
+            fout.println();
+            for(int i=0; i<this.nItems; i++){
+                fout.printtab(this.itemNames[i]);
+                for(int j=0; j<this.nPersons; j++){
+                    fout.printtab(Fmath.truncate(this.scores0[i][j], this.trunc));
+                }
+                fout.println();
+            }
+        }
+        else{
+            fout.printtab("Person");
+            for(int i=0; i<this.nItems; i++){
+                fout.printtab(this.itemNames[i]);
+            }
+            fout.println();
+            for(int i=0; i<this.nPersons; i++){
+                fout.printtab(i+1);
+                for(int j=0; j<this.nItems; j++){
+                    fout.printtab(Fmath.truncate(this.scores1[i][j], this.trunc));
+                }
+                fout.println();
+            }
+        }
 
         fout.close();
     }
@@ -1740,14 +1837,14 @@ public class PCA extends Scores{
         fout.println();
         fout.printtab(" ");
         fout.printtab("component");
-        for(int i=0; i<this.nItems; i++)fout.printtab((this.eigenValueIndices[i]+1) + " (" + (i+1) + ")");
+        for(int i=0; i<this.nItems; i++)fout.printtab((this.rotatedIndices[i]+1) + " (" + (i+1) + ")");
         fout.printtab(" ");
         fout.printtab("Eigenvalue");
         fout.printtab("% Proportion");
         fout.println("Cumulative %");
         fout.println("factor");
         for(int i=0; i<nExtracted; i++){
-            fout.printtab((i+1) + " (" + (this.eigenValueIndices[i]+1) + ")");
+            fout.printtab((i+1) + " (" + (this.rotatedIndices[i]+1) + ")");
             fout.printtab(" ");
             for(int j=0; j<this.nItems; j++)fout.printtab(Fmath.truncate(this.rotatedLoadingFactorsAsRows[i][j], this.trunc));
             fout.printtab(" ");
@@ -1755,7 +1852,43 @@ public class PCA extends Scores{
             fout.printtab(Fmath.truncate(rotatedProportionPercentage[i], this.trunc));
             fout.println(Fmath.truncate(rotatedCumulativePercentage[i], this.trunc));
         }
+
+
         fout.println();
+
+
+        fout.println("DATA USED");
+        fout.println("Number of items = " + this.nItems);
+        fout.println("Number of persons = " + this.nPersons);
+
+        if(this.originalDataType==0){
+            fout.printtab("Item");
+            for(int i=0; i<this.nPersons; i++){
+                fout.printtab(i+1);
+            }
+            fout.println();
+            for(int i=0; i<this.nItems; i++){
+                fout.printtab(this.itemNames[i]);
+                for(int j=0; j<this.nPersons; j++){
+                    fout.printtab(Fmath.truncate(this.scores0[i][j], this.trunc));
+                }
+                fout.println();
+            }
+        }
+        else{
+            fout.printtab("Person");
+            for(int i=0; i<this.nItems; i++){
+                fout.printtab(this.itemNames[i]);
+            }
+            fout.println();
+            for(int i=0; i<this.nPersons; i++){
+                fout.printtab(i+1);
+                for(int j=0; j<this.nItems; j++){
+                    fout.printtab(Fmath.truncate(this.scores1[i][j], this.trunc));
+                }
+                fout.println();
+            }
+        }
 
         fout.close();
     }

@@ -456,7 +456,7 @@ public class AtoD  extends BlackBox{
             bb.nBits = this.nBits;
             bb.maximumDecimal = this.maximumDecimal;
             bb.vRef = this.vRef;
-            bb.vBinary = this.vBinary.clone();
+            bb.vBinary = Conv.copy(this.vBinary);
             bb.trueAtoD = this.trueAtoD;
             bb.range = this.range;
             bb.voltageOutput = this.voltageOutput;

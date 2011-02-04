@@ -9,27 +9,16 @@
 *   WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:       July 2002
-*   REVISED:    25 July 2004
-*               11 June 2005 - Made into superclass for revised FileChooser
-*               13 September 2005 - numeric input - colon and semicolon stripping added
-*               30 November 2005 - stem name method
-*               21 February 2006  nextWord corrected
-*               1 July 2006 - access status of FileInput() constructor changed
-*               20 September 2006 - getPathName made public
-*               27 June 2007 - Phasor input added
-*               21-23 July 2007 - BigDecimal, BigInteger, short and byte added
-*               26 February 2008 - removeSpaceAsDelimiter added
-*               4 April 2008 - numberOfLines added
-*               7 July 2008 - code tidying
-*               8 July 2008 - get end of line status added
-*               2 February 2009 - produce a copy of the file added
+*   REVISED:    25 July 2004, 11 June 2005, 13 September 2005, 30 November 2005, 1 July 2006
+*               20 September 2006, 27 June 2007, 21-23 July 2007, 26 February 2008, 4 April 2008
+*               7 July 2008, 8 July 2008, 2 February 2009, 13 November 2010, 13 December 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web page:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/FileInput.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2002 - 2008 Michael Thomas Flanagan
+*   Copyright (c) 2002 - 2010 Michael Thomas Flanagan
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for
@@ -47,6 +36,7 @@ package flanagan.io;
 
 import java.io.*;
 import java.math.*;
+import java.util.ArrayList;
 
 import flanagan.complex.Complex;
 import flanagan.circuits.Phasor;
@@ -54,22 +44,25 @@ import flanagan.circuits.Phasor;
 public class FileInput{
 
         // Instance variables
-        protected String fileName = " ";          //input file name
-        protected String stemName = " ";          //input file name without its extension
-        protected String pathName = " ";          //input file path name
-        protected String dirPath = " ";           //path to directory containing input file
-        protected String fullLine = " ";          //current line in input file
-        protected String fullLineT = " ";         //current line in input file trimmed of trailing spaces
-        protected BufferedReader input = null;    //instance of BufferedReader
-        protected boolean testFullLine = false;   //false if fullLine is empty
-        protected boolean testFullLineT = false;  //false if fullLineT is empty
-        protected boolean eof = false;            //true if reading beyond end of file attempted
-        protected boolean fileFound = true;       //true if file named is found
-        protected boolean inputType = false;      //false in input type is a String
-                                                  //true if input type is numeric or separated char, i.e. double, float, int, long, char
-        protected boolean charType = false;       //true if input type is a separated char
-        protected boolean space = true;           //if true -  a space is treated as a delimiter in reading a line of text
-        protected boolean supressMessage = false; //if true -  read beyond end of file message suppressed
+        protected String fileName = " ";            //input file name
+        protected String stemName = " ";            //input file name without its extension
+        protected String extension = " ";           //input file name extension
+        protected String pathName = " ";            //input file path name
+        protected String dirPath = " ";             //path to directory containing input file
+        protected String fullLine = " ";            //current line in input file
+        protected String fullLineT = " ";           //current line in input file trimmed of trailing spaces
+        protected BufferedReader input = null;      //instance of BufferedReader
+        protected boolean testFullLine = false;     //false if fullLine is empty
+        protected boolean testFullLineT = false;    //false if fullLineT is empty
+        protected boolean eof = false;              //true if reading beyond end of file attempted
+        protected boolean fileFound = true;         //true if file named is found
+        protected boolean inputType = false;        //false in input type is a String with inclusion of punctuation
+                                                    //true if input type is numeric or separated char, i.e. double, float, int, long, char
+        protected boolean charType = false;         //true if input type is a separated char
+        protected boolean space = true;             //if true -  a space is treated as a delimiter in reading a line of text
+        protected boolean supressMessage = false;   //if true -  read beyond end of file message suppressed
+        protected boolean wordMethod = false;       // true if readWord called
+        protected String holdingWord = "HoldingWordMLPYGV";    // word used to hold an identified space that needs retaining on calling readWord
 
         // Constructor
         // Constructor to enable sub-class FileChooser to function
@@ -92,6 +85,7 @@ public class FileInput{
                 }
                 else{
                     this.stemName = this.fileName.substring(0, posDot);
+                    this.extension = this.fileName.substring(posDot);
                 }
 
                 try{
@@ -117,6 +111,11 @@ public class FileInput{
         // get file name without the extension
         public String getStemName(){
             return this.stemName;
+        }
+
+        // get file name extension
+        public String getExtension(){
+            return this.extension;
         }
 
         // Get path to directory containing the file
@@ -306,8 +305,27 @@ public class FileInput{
                 return retB;
         }
 
-        // Reads a word (a string between spaces) from the file
+        // Reads a word (a string between all separators) from the file
         public final synchronized String readWord(){
+                this.inputType = true;
+                this.wordMethod = true;
+                String word="";
+
+                if(!this.testFullLineT) this.enterLine();
+                if(this.fullLine.equals("")){
+                    word=" ";
+                }else
+                {
+                    word = nextWord();
+                    if(word.equals(""))word=" ";
+                    if(word.trim().equals(this.holdingWord))word=" ";
+                }
+
+                return word;
+        }
+
+        // Reads a word (a string between spaces) from the file
+        public final synchronized String readWordSaceOnly(){
                 this.inputType = false;
                 String word="";
 
@@ -317,6 +335,7 @@ public class FileInput{
                 }else
                 {
                     word = nextWord();
+                    if(word.equals(""))word=" ";
                 }
 
                 return word;
@@ -391,6 +410,10 @@ public class FileInput{
                 int i=0;
 
                 this.fullLine=this.readLineL();
+
+                // check for readWord reading allowed spaces
+                if(this.wordMethod)this.checkWordSpaces();
+
                 this.fullLineT=this.fullLine;
                 if(!this.fullLine.equals("")){
                     i=this.fullLineT.length()-1;
@@ -401,8 +424,106 @@ public class FileInput{
                 }
         }
 
-        // reads the next word (a string between delimeters) from the String fullLine
+       // Check for space/s only or "" between non-space separators if method readWord called
+       // substitute holding word if found
+       public void checkWordSpaces(){
+
+                int len=this.fullLine.length();
+
+                // Check for space/s only or "" between non-space separators if method readWord called
+                // substitute holding word if found
+                if(this.wordMethod){
+                    boolean test3 = false;
+                    ArrayList<Integer> al1 = new ArrayList<Integer>();
+                    ArrayList<Integer> al2 = new ArrayList<Integer>();
+                    for(int i=0; i<len; i++){
+                        test3 = false;
+                        if(this.fullLine.charAt(i)=='\t')test3=true;
+                        if(this.fullLine.charAt(i)==',')test3=true;
+                        if(this.fullLine.charAt(i)==':')test3=true;
+                        if(this.fullLine.charAt(i)==';')test3=true;
+                        if(test3)al1.add(new Integer(i));
+                    }
+                    int nal1 = al1.size();
+
+                    if(nal1>0){
+                        boolean test4 = true;
+                        boolean test5 = true;
+                        boolean test6 = false;
+                        int ii = 0;
+                        int jj = 0;
+                        int kk = 0;
+                        while(test4){
+                            test5 = true;
+                            test6 = false;
+                            jj =((Integer)al1.get(ii)).intValue();
+                            if(jj==0){
+                                test6 = true;
+                            }
+                            else{
+                                if(jj==len-1){
+                                    test6 = true;
+                                    test4 = false;
+                                }
+                                else{
+                                    if(ii==nal1-1){
+                                        test5 = true;
+                                        for(int i=jj+1; i<len; i++){
+                                            if(this.fullLine.charAt(i)!=' '){
+                                                test5 = false;
+                                            }
+                                            if(!test5)break;
+                                        }
+                                        if(test5)test6 = true;
+                                        test4 = false;
+
+                                    }
+                                    else{
+                                        kk  =((Integer)al1.get(ii+1)).intValue();
+                                        test5 = true;
+                                        for(int i=jj+1; i<kk; i++){
+                                            if(this.fullLine.charAt(i)!=' '){
+                                                test5 = false;
+                                            }
+                                            if(!test5)break;
+                                        }
+                                        if(test5)test6 = true;
+                                        ii++;
+                                    }
+                                }
+                            }
+                            if(test6){
+                                al2.add(new Integer(jj+1));
+                            }
+                            if(ii>=nal1)test4 = false;
+                        }
+
+                        int nal2 = al2.size();
+                        if(nal2>0){
+                            for(int i=nal2-1; i>=0; i--){
+                                int mm = ((Integer)al2.get(i)).intValue();
+                                if(mm>=len-1){
+                                    this.fullLine += this.holdingWord;
+                                }
+                                else{
+                                    if(mm==1){
+                                        this.fullLine = this.holdingWord + this.fullLine;
+                                    }
+                                    else{
+                                        String sub1 = this.fullLine.substring(0,mm);
+                                        String sub2 = this.fullLine.substring(mm);
+                                        this.fullLine = sub1 + this.holdingWord + sub2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+
+        // reads the next word (a string between delimiters) from the String fullLine
         protected final synchronized String nextWord(){
+
                 this.testFullLine=true;
                 this.testFullLineT=true;
                 String  word = "";
@@ -410,7 +531,8 @@ public class FileInput{
                 boolean test = true;
                 int len=this.fullLine.length();
 
-                // strip end of the word of any leading spaces, tabs or, if numerical input, commas, colons or semicolons
+
+                // strip end of the word of any spaces, tabs or, if numerical input, commas, colons or semicolons
                 boolean test0 = true;
                 boolean test1 = false;
                 int pend =this.fullLine.length();
@@ -602,4 +724,6 @@ public class FileInput{
             fin.close();
             return nLines;
         }
+
+
 }

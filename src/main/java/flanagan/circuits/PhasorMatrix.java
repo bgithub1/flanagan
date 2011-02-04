@@ -11,14 +11,14 @@
 * 	WRITTEN BY: Dr Michael Thomas Flanagan
 *
 *   DATE:	    July 2007
-*   AMENDED:    19 April 2008
+*   AMENDED:    19 April 2008, 14 November 2010
 *
 *   DOCUMENTATION:
 *   See Michael Thomas Flanagan's Java library on-line web pages:
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/PhasorMatrix.html
 *   http://www.ee.ucl.ac.uk/~mflanaga/java/
 *
-*   Copyright (c) 2007 - 2008
+*   Copyright (c) 2007 - 2010
 *
 *   PERMISSION TO COPY:
 *   Permission to use, copy and modify this software and its documentation for
@@ -142,8 +142,8 @@ public class PhasorMatrix{
     	// Set a sub-matrix starting with row index i, column index j
     	// and ending with row index k, column index l
     	public void setSubMatrix(int i, int j, int k, int l, Phasor[][] subMatrix){
-        	if(i>k)throw new IllegalArgumentException("row indices inverted");
-        	if(j>l)throw new IllegalArgumentException("column indices inverted");
+        	if(i+k-1>=this.nrow)throw new IllegalArgumentException("Sub-matrix position is outside the row bounds of this Matrix");
+        	if(j+l-1>=this.ncol)throw new IllegalArgumentException("Sub-matrix position is outside the column bounds of this Matrix");
         	int n=k-i+1, m=l-j+1;
         	for(int p=0; p<n; p++){
             		for(int q=0; q<m; q++){
@@ -281,8 +281,9 @@ public class PhasorMatrix{
     	// Return a sub-matrix starting with row index i, column index j
     	// and ending with column index k, row index l
     	public PhasorMatrix getSubMatrix(int i, int j, int k, int l){
-        	if(i>k)throw new IllegalArgumentException("row indices inverted");
-        	if(j>l)throw new IllegalArgumentException("column indices inverted");
+         	if(i+k-1>=this.nrow)throw new IllegalArgumentException("Sub-matrix position is outside the row bounds of this Matrix");
+        	if(j+l-1>=this.ncol)throw new IllegalArgumentException("Sub-matrix position is outside the column bounds of this Matrix");
+
         	int n=k-i+1, m=l-j+1;
         	PhasorMatrix subMatrix = new PhasorMatrix(n, m);
         	Phasor[][] sarray = subMatrix.getArrayReference();
