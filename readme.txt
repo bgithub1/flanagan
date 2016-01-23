@@ -1,4 +1,10 @@
-This is a copy of Dr Michael Thomas Flanagan's Library
+This is a copy of Dr Michael Thomas Flanagan's Library.  Since I had to play around with it a little to get it to build,
+I decided to post it GitHub for anyone else who wanted to play with.
+
+BELOW IS A COPY OF THE ORIGINAL README.md from  Dr Michael Thomas Flanagan's Library.  I did not write it.
+-- bgithub1
+
+
 A large number of individuals have requested copies of this library. Consequently I have 
 made it available, as a jar file (see below), with the qualifation that it is written 
 to suport a course that I lecture. Though I believe it is professionally written, it is 
