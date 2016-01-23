@@ -1,3 +1,4 @@
+This is a copy of Dr Michael Thomas Flanagan's Library
 A large number of individuals have requested copies of this library. Consequently I have 
 made it available, as a jar file (see below), with the qualifation that it is written 
 to suport a course that I lecture. Though I believe it is professionally written, it is 
